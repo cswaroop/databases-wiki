@@ -23,11 +23,11 @@ psql pacman pacman
 
 CREATE TABLE a 
 (
-	id int NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY, 
-	data text, 
-	length numeric,
-	createdby int, -- WHO
-	createdat timestamptz DEFAULT NOW(), -- WHEN
+	  id int NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY, 
+	, data text
+	, length numeric
+	-- , createdby int -- WHO
+	-- , createdat timestamptz DEFAULT NOW() -- WHEN
 );
 
 INSERT INTO a VALUES (DEFAULT, 'a', 100) RETURNING id;
@@ -45,3 +45,15 @@ WHERE
   a.id=1
   
 ```
+
+Instead of commands we can create a procedure
+```CREATE PROCEDURE insert_data(a integer, b integer)
+LANGUAGE SQL
+AS $$
+INSERT INTO a VALUES (a);
+INSERT INTO tbl VALUES (b);
+$$;
+
+CALL insert_data(1, 2);
+```
+
