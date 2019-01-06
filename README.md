@@ -1,5 +1,5 @@
 # Postgres SQL Development Notes
-This is meant for Postgres SQL development notes
+This is meant for Postgres SQL development notes sourced from varies postgres resources
 ## Getting started with postgres
 ### Init postgres instance (initdb)
 Goto `bin` directory
@@ -22,4 +22,14 @@ INSERT INTO a VALUES (DEFAULT, 'a') RETURNING id;
 ```
 
 ### READ (SELECT)
-
+```
+SELECT * FROM a;
+SELECT 
+    id AS aid
+  , data AS content
+FROM
+  a
+WHERE
+  a.id=1
+  
+```
