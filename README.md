@@ -47,7 +47,8 @@ WHERE
 ```
 
 Instead of commands we can create a procedure
-```CREATE PROCEDURE insert_data(a integer, b integer)
+```
+CREATE PROCEDURE insert_data(a integer, b integer)
 LANGUAGE SQL
 AS $$
 INSERT INTO a VALUES (a);
