@@ -16,8 +16,8 @@ CREATE DATABASE pacman OWNER pacman;
 ### CREATE/UPDATE/DELETE
 ```
 psql pacman pacman
-CREATE TABLE a (id int NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY, data text);
-INSERT INTO a VALUES (DEFAULT, 'a') RETURNING id;
+CREATE TABLE a (id int NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY, data text, length numeric);
+INSERT INTO a VALUES (DEFAULT, 'a', 100) RETURNING id;
 \q
 ```
 
@@ -27,6 +27,7 @@ SELECT * FROM a;
 SELECT 
     id AS aid
   , data AS content
+  , length AS length
 FROM
   a
 WHERE
