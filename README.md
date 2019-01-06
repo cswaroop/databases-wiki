@@ -13,15 +13,13 @@ CREATE ROLE pacman PASSWORD 'pacman';
 CREATE DATABASE pacman OWNER pacman;
 \q
 ```
-### CREATE/UPDATE/DELETE
+### CREATE/UPDATE/DELETE/SELECT
 ```
 psql pacman pacman
 CREATE TABLE a (id int NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY, data text, length numeric);
 INSERT INTO a VALUES (DEFAULT, 'a', 100) RETURNING id;
 \q
 ```
-
-### READ (SELECT)
 ```
 SELECT * FROM a;
 SELECT 
