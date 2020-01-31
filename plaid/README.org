@@ -1,0 +1,4 @@
+https://plaid.com/docs/
+
+pg_dump -f plaid-db.sql -E utf8 -d postgres -U postgres
+

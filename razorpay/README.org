@@ -1,0 +1,3 @@
+https://razorpay.com/docs/api
+
+pg_dump -f razorpay-db.sql -E utf8 -d razorpay -U razorpay
