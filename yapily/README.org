@@ -1,0 +1,188 @@
+https://docs.yapily.com/?version=latest
+
+A OpenBanking platform reference implementation
+
+Banks
+- AIB Group aka First Trust Bank
+- Bank of Ireland
+- Barclay's Bank
+
+
+* Accounting
+
+* Payments
+
+* KYC
+
+* Lending
+
+* Money Management
+
+* Corporate Banking
+
+* Jobs
+
+** Senior Software Engineer
+
+
+Responsibilities
+
+    Support, maintain, and build APIs, tooling, automations, and monitoring services using technologies and services such as, or similar to: GCP, AWS, Kubernetes, Docker, Java, Spring Boot, Vaadin, Reactor, Jenkins, PostgreSQL, Swagger, OpenAPI, etc.
+
+    Define REST API/JSON specification, test cases and build sample open source API code clients.
+
+    Build API clients to consume data from multiple sources, normalising and aggregating formats, in real time or distributed reactive streams.
+
+    Manage individual project priorities, deadlines and deliverables.
+
+Qualifications
+
+ 
+
+    BA/BS degree in Computer Science or equivalent technical work experience
+
+    5+ years of development experience
+
+    2+ years of experience managing people
+
+    Experience developing and executing a software roadmap
+
+    Experience managing front-end, back-end, and services-oriented software systems
+
+    Able to bring experience and ideas that will help Yapily deliver highly efficient and secured services
+
+    Experience leading highly-skilled software engineering teams
+
+    Experience building teams and recruiting software engineers
+
+Desirable Qualifications
+
+    Financial Technology and/or Payment industry experience
+
+    Security and Cryptography knowledge
+
+    OpenID, OAuth2.0, OAuth1.0, JWT
+
+    Spring framework & Spring Security
+
+    Swagger or OpenAPI Specification
+
+    CI/CD/TDD & Automation with Jenkins, Selenium, Postman, Newman
+
+    Excellent written and verbal communication skills with the ability to present complex technical information in a clear and concise manner to a variety of audiences
+
+    Ability to handle multiple, competing priorities in a fast-paced environment
+
+    Ability to navigate ambiguity and delivery incrementally to the right direction
+
+    A deep understanding of the software development lifecycle, and a track record of shipping software on time
+
+    Experience designing software architectures for scalability, reliability, security and performance
+
+    A passion for people management and mentorship
+
+** Technical Product Owner
+
+Job Description
+
+You will be driving key initiatives within the Yapily product portfolio, working with the Head of Product and collaborating with Sales, Engineering, financial institutions, Regulators and our clients.
+
+You will be responsible for ensuring that our approach to product development and launch is well managed and covers all aspects of the product, from design, feasibility, delivery and client adoption.
+
+The product Owner ensures that features and functionality defined on the roadmap accurately reflect customer and market requirements.   Also responsible for supporting the business case creation for new products and for increasing the profitability of existing products. Working collaboratively with the Product and Engineering leadership team, the Product Owner builds product initiatives from existing ideas and helps develop new ideas based on industry experience and work in the market.
+
+Key responsibilities:
+
+    Responsible for managing the planning and execution throughout the product lifecycle – from strategic planning to tactical activities. This includes gathering and prioritising the market, product and customer requirements, communicating the product vision, and working closely with Development/Engineering, Sales & Marketing and Business Development to ensure revenue and customer satisfaction goals are surpassed.
+    Support development by defining features and user stories that break down the requirements into end-to-end functionality
+    Outline workflows and customer journeys required to guide engineering
+    Support the Project Manager to maintain a visible product roadmap and project schedule
+    Own and drive the business plan for the solution, working with key stakeholders to ensure the most effective decisions are reached regarding the lifecycle of the solution offering.
+    Manage the ongoing roadmap for specific products and work closely with Development to ensure that the solution(s) developed fulfil the needs of the customers in a timely manner.
+    Working closely with the Yapily customers to ensure that their requirements are appropriately captured, prioritised and considered alongside product planning across the Yapily product portfolio.
+    Support the go to market execution with team members to ensure sales, marketing, service and operations are ready across all markets.
+    Conduct technical research of both new features and competitor analysis along with business intelligence in support of the product roadmap.
+    Support Sales team with product and solution presentations and client visits, both in the UK and abroad.
+    Support the Marketing team with product and solution collateral to position the appropriate solution and support sales process.
+    With Product leadership, act as product champion for Sales, communicating the value proposition of the products to the Sales team and working with them to define and develop the necessary tools that support the selling of your product
+    Promote the product line and business in general through select online media channels.  (Slack, LinkedIn, Medium, etc.)
+
+Qualifications
+
+    A minimum of 3 years’ experience of Product Management experienced within a technology vendor ideally within the financial services or API industry.
+    An ability to clearly define the Product Owner, Product Manager and Product Marketing roles and understand the cross over between these roles in an agile software development environment
+    Excellent written and oral communication skills in English.
+    Commercial acumen: a proven track record of understanding business value, with a key sensitivity to understanding sales and marketing challenges and building collateral to positively manage such challenges with the objective of strengthening business and making product / solution sales
+    Attitude: proactive and focused.  Driven on delivering client solutions with the end user success always in mind while ensuring that sales and product revenue are optimised.
+    Results oriented: structured and highly organised, in a fast paced and dynamic environment you will already have a strategy for ‘getting things done’ and able to driving results without supervision.
+    Experience of operating within a B2B role
+    Experience of working directly with clients and supporting POC initiatives to enable successful conversion to satisfied and paying customers
+
+
+** Data Engineer
+
+Job Description
+
+Yapily is building API connections to all retail banks, normalising and enriching the data, and providing it through a highly secure and performant API.
+
+Yapily is seeking Data Engineer to uncover key insights on financial data. Banks used to own everyone’s financial data, but that was the past. Now with Open Banking people's finances' data is available to regulated companies to provide better financial services to everyone, using Yapily’s proprietary APIs.
+Qualifications
+
+Key Responsibilities
+
+    Build, maintain and improve on our predictive models for metadata attributes of financial data
+
+    Support the analytical needs of the product team inclusive of statistical inferences, demand modelling, feature engineering and the bespoke evaluation of data usage licensing deals
+
+    Participate in research in machine intelligence and machine learning applications
+
+    Develop solutions for real world, financial data problems
+
+Qualifications
+
+    Master's degree in machine learning, operational research, computer science, statistics, applied mathematics or a related field; or equivalent experience
+
+    Professional work experience in data science, business intelligence or analytics
+
+    +3 years experience (Academic or commercial) in machine learning or ML related fields
+
+    Strong analytical and statistical modelling skills
+
+    Experience with ML libraries and frameworks including; Scikit Learn, Tensorflow, Torch, Caffe
+
+    Experience with NLP or text classification
+
+    Language experience (Academic or commercial) in some of the following languages; Python, R, Matlab, Java, Scala, Hadoop
+
+    Experience presenting complex data subjects to general audience and dealing with clients
+
+    Proactive and self-motivated
+
+** Content Marketing Manager
+
+Job Description
+
+What you’ll be doing 
+
+The Content Specialist will own and execute the content marketing strategy. You will have a unique opportunity to hugely impact and grow the Yapily brand reputation as a leading connectivity provider in Open Banking. 
+
+Your activities will contribute to revenue generated from both new and existing customers by developing effective content for lead generation, inbound marketing and communications. You will be integral to driving traffic and delivering quality leads to our SDR team through amazing content. 
+
+Responsibilities 
+
+    Strategy - defining our content strategy, creating a content calendar, establishing best practice models that work for our business  
+    Execution - create compelling copy for content, marketing assets and other deliverables - from scratch - for sales and marketing enablement 
+    Brand building and awareness - develop a content library for distribution across our digital platforms including automation tools, social media, email and website 
+    PR - building relationships with our PR agency, scheduling interviews, crafting media responses 
+
+Qualifications
+
+What we’re looking for 
+
+    3+ years of relevant experience in content marketing
+    You are tech savvy and can use the latest tools such as Marketing Automation, Adobe and CMS platforms
+    You have exceptional written and communication skills for the technology sector 
+    A keen eye for design - you like your work to look beautiful and creative
+    You can spot new content opportunities through industry trends and research 
+    Polite, charming and personable, you enjoy building relationships 
+    Attention to detail with effective time management and prioritisation skills
