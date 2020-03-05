@@ -1,0 +1,155 @@
+[
+  {
+    "context": "project",
+    "nameSpace": "XM",
+    "type": "ProjectType",
+    "table": "xt.prjtypeext",
+    "isExtension": true,
+    "comment": "Extended by Project",
+    "relations": [
+      {
+        "column": "prjtypeext_id",
+        "inverse": "id"
+      }
+    ],
+    "properties": [
+      {
+        "name": "emailProfile",
+        "toOne": {
+          "type": "ProjectEmailProfile",
+          "column": "prjtypeext_emlprofile_id"
+        }
+      }
+    ],
+    "sequence": 0,
+    "isSystem": true
+  },
+  {
+    "context": "project",
+    "nameSpace": "XM",
+    "type": "IncidentRelation",
+    "table": "incdt",
+    "isExtension": true,
+    "comment": "Extended by Project",
+    "relations": [
+      {
+        "column": "incdt_id",
+        "inverse": "id"
+      }
+    ],
+    "properties": [
+      {
+        "name": "project",
+        "attr": {
+          "type": "Number",
+          "column": "incdt_prj_id"
+        }
+      }
+    ],
+    "sequence": 0,
+    "isSystem": true
+  },
+  {
+    "context": "project",
+    "nameSpace": "XM",
+    "type": "Account",
+    "table": "crmacct",
+    "isExtension": true,
+    "comment": "Extended by Project",
+    "relations": [
+      {
+        "column": "crmacct_id",
+        "inverse": "id"
+      }
+    ],
+    "properties": [
+      {
+        "name": "projectRelations",
+        "toMany": {
+          "type": "ProjectRelation",
+          "column": "crmacct_number",
+          "inverse": "account"
+        }
+      }
+    ],
+    "sequence": 0,
+    "isSystem": true
+  },
+  {
+    "context": "project",
+    "nameSpace": "XM",
+    "type": "Contact",
+    "table": "cntct",
+    "isExtension": true,
+    "comment": "Extended by Project",
+    "relations": [
+      {
+        "column": "cntct_id",
+        "inverse": "id"
+      }
+    ],
+    "properties": [
+      {
+        "name": "projectRelations",
+        "toMany": {
+          "type": "ProjectRelation",
+          "column": "cntct_number",
+          "inverse": "contact"
+        }
+      }
+    ],
+    "sequence": 0,
+    "isSystem": true
+  },
+  {
+    "context": "project",
+    "nameSpace": "XM",
+    "type": "Incident",
+    "table": "xt.incdtxt",
+    "isExtension": true,
+    "comment": "Extended by Project",
+    "relations": [
+      {
+        "column": "incdt_id",
+        "inverse": "id"
+      }
+    ],
+    "properties": [
+      {
+        "name": "project",
+        "toOne": {
+          "isNested": true,
+          "type": "ProjectRelation",
+          "column": "incdt_prj_id"
+        }
+      }
+    ],
+    "sequence": 0,
+    "isSystem": true
+  },
+  {
+    "context": "project",
+    "nameSpace": "XM",
+    "type": "IncidentListItem",
+    "table": "xt.incdtinfo",
+    "isExtension": true,
+    "comment": "Extended by Project",
+    "relations": [
+      {
+        "column": "incdt_id",
+        "inverse": "id"
+      }
+    ],
+    "properties": [
+      {
+        "name": "project",
+        "toOne": {
+          "type": "ProjectRelation",
+          "column": "incdt_prj_id"
+        }
+      }
+    ],
+    "sequence": 0,
+    "isSystem": true
+  }
+]

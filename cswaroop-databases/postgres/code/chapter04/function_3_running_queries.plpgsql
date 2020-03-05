@@ -1,0 +1,16 @@
+CREATE OR REPLACE FUNCTION running_queries(rows int, qlen int)
+  RETURNS SETOF running_queries AS
+$$
+BEGIN
+   RETURN QUERY SELECT
+      runtime,
+      pid,
+      usename,
+      waiting,
+      substring(query,1,qlen) as query
+   FROM running_queries
+   ORDER BY 1 DESC
+   LIMIT rows;
+END;
+$$ LANGUAGE plpgsql;
+

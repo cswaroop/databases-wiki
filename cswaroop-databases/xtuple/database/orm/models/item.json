@@ -1,0 +1,1437 @@
+[
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "ClassCode",
+    "table": "classcode",
+    "isRest": true,
+    "idSequenceName": "classcode_classcode_id_seq",
+    "lockable": true,
+    "comment": "Class Code Map",
+    "privileges": {
+      "all": {
+        "create": "MaintainClassCodes",
+        "read": "ViewClassCodes",
+        "update": "MaintainClassCodes",
+        "delete": "MaintainClassCodes"
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "classcode_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "code",
+        "attr": {
+          "type": "String",
+          "column": "classcode_code",
+          "isNaturalKey": true,
+          "required": true
+        }
+      },
+      {
+        "name": "description",
+        "attr": {
+          "type": "String",
+          "column": "classcode_descrip"
+        }
+      }
+    ],
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "FreightClass",
+    "table": "freightclass",
+    "isRest": true,
+    "idSequenceName": "freightclass_freightclass_id_seq",
+    "lockable": true,
+    "comment": "Freight Class Map",
+    "privileges": {
+      "all": {
+        "create": "MaintainFreightClasses",
+        "read": "ViewFreightClasses",
+        "update": "MaintainFreightClasses",
+        "delete": "MaintainFreightClasses"
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "freightclass_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "code",
+        "attr": {
+          "type": "String",
+          "column": "freightclass_code",
+          "isNaturalKey": true,
+          "required": true
+        }
+      },
+      {
+        "name": "description",
+        "attr": {
+          "type": "String",
+          "column": "freightclass_descrip"
+        }
+      }
+    ],
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "Item",
+    "table": "item",
+    "idSequenceName": "item_item_id_seq",
+    "isRest": true,
+    "lockable": true,
+    "comment": "Item Map",
+    "privileges": {
+      "all": {
+        "create": "MaintainItemMasters",
+        "read": "ViewItemMasters",
+        "update": "MaintainItemMasters",
+        "delete": "DeleteItemMasters"
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "item_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "number",
+        "attr": {
+          "type": "String",
+          "column": "item_number",
+          "isNaturalKey": true,
+          "required": true
+        }
+      },
+      {
+        "name": "isActive",
+        "attr": {
+          "type": "Boolean",
+          "column": "item_active",
+          "required": true
+        }
+      },
+      {
+        "name": "description1",
+        "attr": {
+          "type": "String",
+          "column": "item_descrip1"
+        }
+      },
+      {
+        "name": "description2",
+        "attr": {
+          "type": "String",
+          "column": "item_descrip2"
+        }
+      },
+      {
+        "name": "itemType",
+        "attr": {
+          "type": "String",
+          "column": "item_type",
+          "required": true
+        }
+      },
+      {
+        "name": "classCode",
+        "toOne": {
+          "type": "ClassCode",
+          "column": "item_classcode_id",
+          "required": true
+        }
+      },
+      {
+        "name": "inventoryUnit",
+        "toOne": {
+          "type": "Unit",
+          "column": "item_inv_uom_id",
+          "required": true
+        }
+      },
+      {
+        "name": "isFractional",
+        "attr": {
+          "type": "Boolean",
+          "column": "item_fractional",
+          "required": true
+        }
+      },
+      {
+        "name": "isConfigured",
+        "attr": {
+          "type": "Boolean",
+          "column": "item_config"
+        }
+      },
+      {
+        "name": "notes",
+        "attr": {
+          "type": "String",
+          "column": "item_comments"
+        }
+      },
+      {
+        "name": "extendedDescription",
+        "attr": {
+          "type": "String",
+          "column": "item_extdescrip"
+        }
+      },
+      {
+        "name": "isSold",
+        "attr": {
+          "type": "Boolean",
+          "column": "item_sold",
+          "required": true
+        }
+      },
+      {
+        "name": "productCategory",
+        "toOne": {
+          "type": "ProductCategory",
+          "column": "item_prodcat_id",
+          "nullValue": -1
+        }
+      },
+      {
+        "name": "freightClass",
+        "toOne": {
+          "type": "FreightClass",
+          "column": "item_freightclass_id"
+        }
+      },
+      {
+        "name": "barcode",
+        "attr": {
+          "type": "String",
+          "column": "item_upccode"
+        }
+      },
+      {
+        "name": "listPrice",
+        "attr": {
+          "type": "SalesPrice",
+          "column": "item_listprice",
+          "required": true
+        }
+      },
+      {
+        "name": "wholesalePrice",
+        "attr": {
+          "type": "SalesPrice",
+          "column": "item_listcost"
+        }
+      },
+      {
+        "name": "priceUnit",
+        "toOne": {
+          "type": "Unit",
+          "column": "item_price_uom_id",
+          "required": true
+        }
+      },
+      {
+        "name": "isExclusive",
+        "attr": {
+          "type": "Boolean",
+          "column": "item_exclusive",
+          "required": true
+        }
+      },
+      {
+        "name": "productWeight",
+        "attr": {
+          "type": "Weight",
+          "column": "item_prodweight"
+        }
+      },
+      {
+        "name": "packageWeight",
+        "attr": {
+          "type": "Weight",
+          "column": "item_packweight"
+        }
+      },
+      {
+        "name": "aliases",
+        "toMany": {
+          "isNested": true,
+          "type": "ItemAlias",
+          "column": "item_id",
+          "inverse": "item"
+        }
+      },
+      {
+        "name": "comments",
+        "toMany": {
+          "isNested": true,
+          "type": "ItemComment",
+          "column": "item_id",
+          "inverse": "item"
+        }
+      },
+      {
+        "name": "characteristics",
+        "toMany": {
+          "type": "ItemCharacteristic",
+          "column": "item_id",
+          "inverse": "item",
+          "isNested": true
+        }
+      },
+      {
+        "name": "documents",
+        "toMany": {
+          "type": "DocumentAssociation",
+          "column": "item_id",
+          "inverse": "source",
+          "sourceType": "I",
+          "isNested": true
+        }
+      },
+      {
+        "name": "itemSites",
+        "toMany": {
+          "type": "ItemItemSiteRelation",
+          "column": "item_id",
+          "inverse": "item",
+          "isNested": true
+        }
+      }
+    ],
+    "isSystem": true,
+    "sourceCode": "I"
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "ItemAlias",
+    "table": "itemalias",
+    "idSequenceName": "itemalias_itemalias_id_seq",
+    "comment": "Item Alias Map",
+    "privileges": {
+      "all": {
+        "create": true,
+        "read": true,
+        "update": true,
+        "delete": true
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "itemalias_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "item",
+        "attr": {
+          "type": "Number",
+          "column": "itemalias_item_id"
+        }
+      },
+      {
+        "name": "aliasNumber",
+        "attr": {
+          "type": "String",
+          "column": "itemalias_number",
+          "required": true
+        }
+      },
+      {
+        "name": "notes",
+        "attr": {
+          "type": "String",
+          "column": "itemalias_comments"
+        }
+      },
+      {
+        "name": "useDescription",
+        "attr": {
+          "type": "Boolean",
+          "column": "itemalias_usedescrip",
+          "required": true
+        }
+      },
+      {
+        "name": "description1",
+        "attr": {
+          "type": "String",
+          "column": "itemalias_descrip1"
+        }
+      },
+      {
+        "name": "description2",
+        "attr": {
+          "type": "String",
+          "column": "itemalias_descrip2"
+        }
+      },
+      {
+        "name": "account",
+        "toOne": {
+          "isNested": true,
+          "type": "AccountRelation",
+          "column": "itemalias_crmacct_id"
+        }
+      }
+    ],
+    "isNestedOnly": true,
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "ItemRelationAlias",
+    "table": "itemalias",
+    "comment": "Item Alias Map",
+    "privileges": {
+      "all": {
+        "create": false,
+        "read": true,
+        "update": false,
+        "delete": false
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "itemalias_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "item",
+        "attr": {
+          "type": "Number",
+          "column": "itemalias_item_id"
+        }
+      },
+      {
+        "name": "aliasNumber",
+        "attr": {
+          "type": "String",
+          "column": "itemalias_number",
+          "required": true
+        }
+      }
+    ],
+    "isNestedOnly": true,
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "ItemCharacteristic",
+    "table": "charass",
+    "idSequenceName": "charass_charass_id_seq",
+    "comment": "Item Characteristic Map",
+    "privileges": {
+      "all": {
+        "create": true,
+        "read": true,
+        "update": true,
+        "delete": true
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "charass_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "targetType",
+        "attr": {
+          "type": "String",
+          "column": "charass_target_type",
+          "value": "I"
+        }
+      },
+      {
+        "name": "item",
+        "attr": {
+          "type": "Number",
+          "column": "charass_target_id"
+        }
+      },
+      {
+        "name": "characteristic",
+        "toOne": {
+          "type": "Characteristic",
+          "column": "charass_char_id",
+          "required": true
+        }
+      },
+      {
+        "name": "value",
+        "attr": {
+          "type": "String",
+          "column": "charass_value"
+        }
+      },
+      {
+        "name": "isDefault",
+        "attr": {
+          "type": "Boolean",
+          "column": "charass_default"
+        }
+      },
+      {
+        "name": "price",
+        "attr": {
+          "type": "Number",
+          "column": "charass_price"
+        }
+      }
+    ],
+    "isNestedOnly": true,
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "ItemComment",
+    "table": "comment",
+    "idSequenceName": "comment_comment_id_seq",
+    "comment": "Item Comment Map",
+    "privileges": {
+      "all": {
+        "create": true,
+        "read": true,
+        "update": "EditOthersComments",
+        "delete": false
+      },
+      "personal": {
+        "update": "EditOwnComments",
+        "properties": [
+          "createdBy"
+        ]
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "comment_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "sourceType",
+        "attr": {
+          "type": "String",
+          "column": "comment_source",
+          "value": "I"
+        }
+      },
+      {
+        "name": "item",
+        "attr": {
+          "type": "Number",
+          "column": "comment_source_id"
+        }
+      },
+      {
+        "name": "commentType",
+        "toOne": {
+          "type": "CommentType",
+          "column": "comment_cmnttype_id",
+          "required": true
+        }
+      },
+      {
+        "name": "text",
+        "attr": {
+          "type": "String",
+          "column": "comment_text"
+        }
+      },
+      {
+        "name": "isPublic",
+        "attr": {
+          "type": "Boolean",
+          "column": "comment_public",
+          "value": true
+        }
+      },
+      {
+        "name": "created",
+        "attr": {
+          "type": "Date",
+          "column": "comment_date"
+        }
+      },
+      {
+        "name": "createdBy",
+        "attr": {
+          "type": "String",
+          "column": "comment_user"
+        }
+      }
+    ],
+    "isNestedOnly": true,
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "ItemItemSiteRelation",
+    "table": "xt.itemsiteinfo",
+    "isRest": true,
+    "comment": "Itemsite Relation Map",
+    "privileges": {
+      "all": {
+        "create": false,
+        "read": true,
+        "update": false,
+        "delete": false
+      },
+      "attribute": {
+        "unitCost": {
+          "view": "ViewCosts MaintainCosts"
+        }
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "itemsite_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "item",
+        "attr": {
+          "type": "Number",
+          "column": "itemsite_item_id"
+        }
+      },
+      {
+        "name": "site",
+        "toOne": {
+          "type": "SiteRelation",
+          "column": "itemsite_warehous_id",
+          "isNested": true
+        }
+      },
+      {
+        "name": "isActive",
+        "attr": {
+          "type": "Boolean",
+          "column": "itemsite_active"
+        }
+      },
+      {
+        "name": "controlMethod",
+        "attr": {
+          "type": "String",
+          "column": "itemsite_controlmethod"
+        }
+      }
+    ],
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "ItemGroup",
+    "table": "itemgrp",
+    "idSequenceName": "itemgrp_itemgrp_id_seq",
+    "comment": "Item Group Map",
+    "privileges": {
+      "all": {
+        "create": "MaintainItemGroups",
+        "read": true,
+        "update": "MaintainItemGroups",
+        "delete": "MaintainItemGroups"
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "itemgrp_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isNaturalKey":true
+        }
+      },
+      {
+        "name": "name",
+        "attr": {
+          "type": "String",
+          "column": "itemgrp_name",
+          "required": true
+        }
+      },
+      {
+        "name": "description",
+        "attr": {
+          "type": "String",
+          "column": "itemgrp_descrip"
+        }
+      },
+      {
+        "name": "items",
+        "toMany": {
+          "isNested": true,
+          "type": "ItemGroupItem",
+          "column": "itemgrp_id",
+          "inverse": "itemGroup"
+        }
+      }
+    ],
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "ItemGroupRelation",
+    "table": "itemgrp",
+    "idSequenceName": "itemgrp_itemgrp_id_seq",
+    "comment": "Item Group Relation Map",
+    "privileges": {
+      "all": {
+        "create": false,
+        "read": true,
+        "update": false,
+        "delete": false
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "itemgrp_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isNaturalKey":true
+        }
+      },
+      {
+        "name": "name",
+        "attr": {
+          "type": "String",
+          "column": "itemgrp_name",
+          "required": true
+        }
+      },
+      {
+        "name": "description",
+        "attr": {
+          "type": "String",
+          "column": "itemgrp_descrip"
+        }
+      }
+    ],
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "ItemGroupItem",
+    "table": "itemgrpitem",
+    "idSequenceName": "itemgrpitem_itemgrpitem_id_seq",
+    "comment": "Item Group Item Map",
+    "privileges": {
+      "all": {
+        "create": "MaintainItemGroups",
+        "read": true,
+        "update": "MaintainItemGroups",
+        "delete": "MaintainItemGroups"
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "itemgrpitem_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "item",
+        "toOne": {
+          "isNested": true,
+          "type": "ItemRelation",
+          "column": "itemgrpitem_item_id",
+          "inverse": "id"
+        }
+      },
+      {
+        "name": "itemGroup",
+        "attr": {
+          "type": "Number",
+          "column": "itemgrpitem_itemgrp_id"
+        }
+      }
+    ],
+    "isNestedOnly": true,
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "ItemListItem",
+    "table": "item",
+    "isRest": true,
+    "comment": "Item List Item Map",
+    "privileges": {
+      "all": {
+        "create": false,
+        "read": true,
+        "update": false,
+        "delete": false
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "item_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "number",
+        "attr": {
+          "type": "String",
+          "column": "item_number",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "isActive",
+        "attr": {
+          "type": "Boolean",
+          "column": "item_active"
+        }
+      },
+      {
+        "name": "description1",
+        "attr": {
+          "type": "String",
+          "column": "item_descrip1"
+        }
+      },
+      {
+        "name": "description2",
+        "attr": {
+          "type": "String",
+          "column": "item_descrip2"
+        }
+      },
+      {
+        "name": "itemType",
+        "attr": {
+          "type": "String",
+          "column": "item_type"
+        }
+      },
+      {
+        "name": "classCode",
+        "toOne": {
+          "type": "ClassCode",
+          "column": "item_classcode_id"
+        }
+      },
+      {
+        "name": "inventoryUnit",
+        "toOne": {
+          "type": "Unit",
+          "column": "item_inv_uom_id"
+        }
+      },
+      {
+        "name": "isFractional",
+        "attr": {
+          "type": "Boolean",
+          "column": "item_fractional"
+        }
+      },
+      {
+        "name": "isSold",
+        "attr": {
+          "type": "Boolean",
+          "column": "item_sold"
+        }
+      },
+      {
+        "name": "productCategory",
+        "toOne": {
+          "type": "ProductCategory",
+          "column": "item_prodcat_id"
+        }
+      },
+      {
+        "name": "barcode",
+        "attr": {
+          "type": "String",
+          "column": "item_upccode"
+        }
+      },
+      {
+        "name": "listPrice",
+        "attr": {
+          "type": "SalesPrice",
+          "column": "item_listprice"
+        }
+      },
+      {
+        "name": "priceUnit",
+        "toOne": {
+          "type": "Unit",
+          "column": "item_price_uom_id"
+        }
+      },
+      {
+        "name": "characteristics",
+        "toMany": {
+          "type": "ItemListItemCharacteristic",
+          "column": "item_id",
+          "inverse": "item",
+          "isNested": true
+        }
+      }
+    ],
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "ItemListItemCharacteristic",
+    "table": "charass",
+    "comment": "Item List Item Characteristic Map",
+    "privileges": {
+      "all": {
+        "create": false,
+        "read": true,
+        "update": false,
+        "delete": false
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "charass_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "targetType",
+        "attr": {
+          "type": "String",
+          "column": "charass_target_type",
+          "value": "I"
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "item",
+        "attr": {
+          "type": "Number",
+          "column": "charass_target_id"
+        }
+      },
+      {
+        "name": "characteristic",
+        "toOne": {
+          "type": "Characteristic",
+          "column": "charass_char_id",
+          "required": true
+        }
+      },
+      {
+        "name": "value",
+        "attr": {
+          "type": "String",
+          "column": "charass_value"
+        }
+      },
+      {
+        "name": "isDefault",
+        "attr": {
+          "type": "Boolean",
+          "column": "charass_default"
+        }
+      },
+      {
+        "name": "price",
+        "attr": {
+          "type": "Number",
+          "column": "charass_price"
+        }
+      }
+    ],
+    "isNestedOnly": true,
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "ItemRelation",
+    "table": "item",
+    "isRest": true,
+    "comment": "Item Relation Map",
+    "privileges": {
+      "all": {
+        "create": false,
+        "read": true,
+        "update": false,
+        "delete": false
+      },
+      "attribute": {
+        "standardCost": {
+          "view": "ViewCosts MaintainCosts"
+        }
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "item_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "number",
+        "attr": {
+          "type": "String",
+          "column": "item_number",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "isActive",
+        "attr": {
+          "type": "Boolean",
+          "column": "item_active"
+        }
+      },
+      {
+        "name": "description1",
+        "attr": {
+          "type": "String",
+          "column": "item_descrip1"
+        }
+      },
+      {
+        "name": "description2",
+        "attr": {
+          "type": "String",
+          "column": "item_descrip2"
+        }
+      },
+      {
+        "name": "itemType",
+        "attr": {
+          "type": "String",
+          "column": "item_type"
+        }
+      },
+      {
+        "name": "inventoryUnit",
+        "toOne": {
+          "type": "Unit",
+          "column": "item_inv_uom_id"
+        }
+      },
+      {
+        "name": "isFractional",
+        "attr": {
+          "type": "Boolean",
+          "column": "item_fractional"
+        }
+      },
+      {
+        "name": "classCode",
+        "toOne": {
+          "type": "ClassCode",
+          "column": "item_classcode_id"
+        }
+      },
+      {
+        "name": "isSold",
+        "attr": {
+          "type": "Boolean",
+          "column": "item_sold"
+        }
+      },
+      {
+        "name": "isConfigured",
+        "attr": {
+          "type": "Boolean",
+          "column": "item_config"
+        }
+      },
+      {
+        "name": "freightClass",
+        "toOne": {
+          "type": "FreightClass",
+          "column": "item_freightclass_id"
+        }
+      },
+      {
+        "name": "barcode",
+        "attr": {
+          "type": "String",
+          "column": "item_upccode"
+        }
+      },
+      {
+        "name": "listPrice",
+        "attr": {
+          "type": "SalesPrice",
+          "column": "item_listprice"
+        }
+      },
+      {
+        "name": "standardCost",
+        "attr": {
+          "derived": true,
+          "type": "Cost",
+          "method": "stdcost(item_id)"
+        }
+      },
+      {
+        "name": "wholesalePrice",
+        "attr": {
+          "type": "SalesPrice",
+          "column": "item_listcost"
+        }
+      },
+      {
+        "name": "priceUnit",
+        "toOne": {
+          "type": "Unit",
+          "column": "item_price_uom_id"
+        }
+      },
+      {
+        "name": "priceUnitRatio",
+        "attr": {
+          "derived": true,
+          "type": "UnitRatio",
+          "method": "iteminvpricerat(item_id)"
+        }
+      },
+      {
+        "name": "productWeight",
+        "attr": {
+          "type": "Weight",
+          "column": "item_prodweight"
+        }
+      },
+      {
+        "name": "packageWeight",
+        "attr": {
+          "type": "Weight",
+          "column": "item_packweight"
+        }
+      },
+      {
+        "name": "aliases",
+        "toMany": {
+          "isNested": true,
+          "type": "ItemRelationAlias",
+          "column": "item_id",
+          "inverse": "item"
+        }
+      },
+      {
+        "name": "characteristics",
+        "toMany": {
+          "type": "ItemRelationCharacteristic",
+          "column": "item_id",
+          "inverse": "item",
+          "isNested": true
+        }
+      }
+    ],
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "ItemRelationCharacteristic",
+    "table": "charass",
+    "comment": "Item Relation Characteristic Map",
+    "privileges": {
+      "all": {
+        "create": false,
+        "read": true,
+        "update": false,
+        "delete": false
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "charass_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "targetType",
+        "attr": {
+          "type": "String",
+          "column": "charass_target_type",
+          "value": "I"
+        }
+      },
+      {
+        "name": "item",
+        "attr": {
+          "type": "Number",
+          "column": "charass_target_id"
+        }
+      },
+      {
+        "name": "characteristic",
+        "toOne": {
+          "type": "Characteristic",
+          "column": "charass_char_id",
+          "required": true
+        }
+      },
+      {
+        "name": "value",
+        "attr": {
+          "type": "String",
+          "column": "charass_value"
+        }
+      },
+      {
+        "name": "isDefault",
+        "attr": {
+          "type": "Boolean",
+          "column": "charass_default"
+        }
+      },
+      {
+        "name": "price",
+        "attr": {
+          "type": "SalesPrice",
+          "column": "charass_price"
+        }
+      }
+    ],
+    "isNestedOnly": true,
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "ProductCategory",
+    "table": "prodcat",
+    "isRest": true,
+    "idSequenceName": "prodcat_prodcat_id_seq",
+    "lockable": true,
+    "comment": "Product Category Map",
+    "privileges": {
+      "all": {
+        "create": "MaintainProductCategories",
+        "read": true,
+        "update": "MaintainProductCategories",
+        "delete": "MaintainProductCategories"
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "prodcat_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "code",
+        "attr": {
+          "type": "String",
+          "column": "prodcat_code",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "description",
+        "attr": {
+          "type": "String",
+          "column": "prodcat_descrip"
+        }
+      }
+    ],
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "Unit",
+    "table": "uom",
+    "isRest": true,
+    "idSequenceName": "uom_uom_id_seq",
+    "lockable": true,
+    "comment": "Unit Map",
+    "privileges": {
+      "all": {
+        "create": "MaintainUOMs",
+        "read": true,
+        "update": "MaintainUOMs",
+        "delete": "MaintainUOMs"
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "uom_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "name",
+        "attr": {
+          "type": "String",
+          "column": "uom_name",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "description",
+        "attr": {
+          "type": "String",
+          "column": "uom_descrip"
+        }
+      },
+      {
+        "name": "isItemWeight",
+        "attr": {
+          "type": "Boolean",
+          "column": "uom_item_weight",
+          "required": true
+        }
+      }
+    ],
+    "isSystem": true
+  }
+]

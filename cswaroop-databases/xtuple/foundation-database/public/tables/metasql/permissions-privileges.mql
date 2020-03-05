@@ -1,0 +1,46 @@
+-- Group: permissions
+-- Name:  privileges
+-- Notes: User Permissions (individual and role permissions)
+-- Notes: used by dspUserPrivileges
+-- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+-- See www.xtuple.com/CPAL for the full text of the software license.
+
+-- Role Privileges
+SELECT usr_id, grp_id AS altid, usrgrp_username as priv_username, grp_name, priv_module, priv_name, priv_descrip  
+FROM usrgrp
+JOIN usr ON (usrgrp_username=usr_username)
+JOIN grp ON (grp_id=usrgrp_grp_id)
+JOIN grppriv ON (grp_id=grppriv_grp_id)
+JOIN priv ON (priv_id=grppriv_priv_id)
+WHERE ((usr_active=true)
+<? if exists("username") ?>
+ AND (usrgrp_username=<? value("username") ?>)
+<? endif ?>
+<? if exists("role") ?>
+ AND (grp_id=<? value("role") ?>)
+<? endif ?>
+<? if exists("privilege") ?>
+ AND (priv_name ~* <? value("privilege") ?>)
+<? endif ?>
+)
+
+UNION 
+
+-- Individual Privileges
+SELECT  usr_id, -1 AS altid, usrpriv_username, 'User Privilege' AS grp_name, priv_module, priv_name, priv_descrip 
+FROM usrpriv 
+JOIN usr ON (usrpriv_username=usr_username)
+JOIN priv ON (priv_id=usrpriv_priv_id)
+WHERE ((usr_active=true)
+<? if exists("username") ?>
+ AND (usrpriv_username=<? value("username") ?>)
+<? endif ?>
+<? if exists("privilege") ?>
+ AND (priv_name ~* <? value("privilege") ?>)
+<? endif ?>
+<? if exists("role") ?>
+ AND (false)
+<? endif ?>
+)
+
+ORDER BY priv_username, priv_module, priv_name, grp_name;

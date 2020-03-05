@@ -1,0 +1,67 @@
+-- Group: detailedInventoryHistory
+-- Name: detail
+-- Notes: used by dspDetailedInventoryHistoryByLocation, dspDetailedInventoryHistoryByLotSerial
+-- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- See www.xtuple.com/CPAL for the full text of the software license.
+
+SELECT
+<? if exists("byLocation") ?>
+       invhist_id, invhist_transdate, invhist_transtype,
+       (invhist_ordtype || '-' || invhist_ordnumber) AS ordernumber,
+       invhist_invuom,
+       item_number, formatlotserialnumber(invdetail_ls_id) AS lotserial,
+       CASE WHEN invhist_posted THEN invdetail_qty
+       END AS transqty,
+       CASE WHEN invhist_posted THEN invdetail_qty_before
+       END AS qohbefore,
+       CASE WHEN invhist_posted THEN invdetail_qty_after
+       END AS qohafter,
+       invhist_posted,
+       'qty' AS transqty_xtnumericrole,
+       'qty' AS qohbefore_xtnumericrole,
+       'qty' AS qohafter_xtnumericrole,
+       CASE WHEN NOT invhist_posted THEN 'warning'
+       END AS qtforegroundrole
+<? else ?>
+       *,
+       (cust_number || '-' || cust_name) AS customerinfo,
+       cohead_shiptoname AS shiptoname,   
+       cohead_shiptoaddress1 AS shiptol1,
+       cohead_shiptoaddress2 AS shiptol2,  
+       cohead_shiptoaddress3  AS shiptol3,   
+       (cohead_shiptocity || ', ' || cohead_shiptostate || ' ' || cohead_shiptozipcode) AS citystatezip,    
+       cohead_shiptocountry  AS country,    
+       (cohead_shipto_cntct_honorific || ' ' || cohead_shipto_cntct_first_name || ' ' || cohead_shipto_cntct_last_name) AS contact,  
+       cohead_shipto_cntct_phone AS contact_phone,                
+       cohead_shipto_cntct_fax AS contact_fax, 
+       cohead_shipto_cntct_email AS contact_email,                 
+       cohead_shiptophone  AS phone   
+
+<? endif ?>
+FROM <? if exists("byLocation") ?>
+       invdetail, invhist, itemsite, item
+     <? else ?>
+       lshist (<? value("itemid") ?>,<? value("warehouseid") ?>,<? value("lotSerial") ?>,
+               <? value("pattern") ?>,<? value("transType") ?>,<? value("startDate") ?>,
+               <? value("endDate") ?>,<? value("trace") ?>,1)
+         LEFT OUTER JOIN cohead ON (lshist_transtype = 'SH' AND 
+                                    SUBSTRING(lshist_ordernumber FROM 1 FOR 2) = 'SO') AND
+                                    (cohead_number = TRIM(SUBSTRING(lshist_ordernumber FROM '-.*-'), '-'))
+         LEFT OUTER JOIN custinfo ON (cust_id=cohead_cust_id)
+     <? endif ?>
+WHERE (
+<? if exists("byLocation") ?>
+        (invdetail_invhist_id=invhist_id)
+    AND (invhist_itemsite_id=itemsite_id)
+    AND (itemsite_item_id=item_id)
+    AND (invdetail_location_id=<? value("location_id") ?>)
+    AND (DATE(invhist_transdate) BETWEEN <? value("startDate") ?> AND <? value("endDate") ?>)
+    AND (transType(invhist_transtype, <? value("transType") ?>))
+<? else ?>
+        (TRUE)
+<? endif ?>
+      )
+<? if exists("byLocation") ?>
+ORDER BY invhist_transdate DESC, invhist_transtype
+<? endif ?>
+;

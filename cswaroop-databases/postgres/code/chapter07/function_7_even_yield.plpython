@@ -1,0 +1,9 @@
+CREATE FUNCTION even_numbers_with_yield(up_to int,
+                                     OUT even int, 
+                                     OUT odd int)
+  RETURNS SETOF RECORD 
+AS $$
+    for i in xrange(0,up_to,2):
+        yield i, i+1
+$$ LANGUAGE plpythonu;
+

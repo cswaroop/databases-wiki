@@ -1,0 +1,507 @@
+-- Group: taxReturn
+-- Name: detail
+-- Notes: 
+--
+--        Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+SELECT taxauth, 
+  taxauth AS group,
+  taxauth_descrip AS description,
+  source,  
+  SUM(salesbase+salesbaseexempt) AS salesbase,
+  formatMoney(SUM(salesbase+salesbaseexempt)) AS f_salesbase,
+  SUM(salestaxbase) AS salestaxbase,
+  formatMoney(SUM(salestaxbase)) AS f_salestaxbase,
+  SUM(reversecharge) AS reversechargebase,
+  formatMoney(SUM(reversecharge)) AS f_reversechargebase,
+  SUM(reversechargetax) AS reversechargetaxbase,
+  formatMoney(SUM(reversechargetax)) AS f_reversechargetaxbase,
+  SUM(purchasebase+purchasebaseexempt) AS purchasebase,
+  formatMoney(SUM(purchasebase+purchasebaseexempt)) AS f_purchasebase,
+  SUM(purchasetaxbase) * -1 AS purchasetaxbase,
+  formatMoney(SUM(purchasetaxbase) * -1) AS f_purchasetaxbase,
+  SUM(salestaxbase) + SUM(purchasetaxbase) AS nettaxbase,
+  formatMoney(SUM(salestaxbase) + SUM(purchasetaxbase)) AS f_nettaxbase,
+  'curr' AS salesbase_xtnumericrole,
+  'curr' AS freightbase_xtnumericrole,
+  'curr' AS salestaxbase_xtnumericrole,
+  'curr' AS purchasebase_xtnumericrole,
+  'curr' AS purchasetaxbase_xtnumericrole,
+  'curr' AS nettaxbase_xtnumericrole,
+  0 AS salestaxbase_xttotalrole,
+  0 AS purchasetaxbase_xttotalrole,
+  0 AS nettaxbase_xttotalrole
+FROM (
+------------BEGIN SALES--------------
+-- All sales tax history including memos 
+SELECT 1 AS sortorder,
+  tax_code AS tax, tax_descrip,
+  COALESCE(taxauth_code,'') AS taxauth, taxauth_name AS taxauth_descrip,
+  curr_abbr, 
+  CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) <> 0) THEN <? value('sales_taxable') ?>
+    ELSE <? value('sales_nontaxable') ?> END AS source,
+  cohist_qtyshipped AS qty,
+ (cohist_qtyshipped * cohist_unitprice) AS amount,
+  CASE
+    WHEN ((cohist_misc_type IS NULL OR cohist_misc_type IN ('M','F')) AND COALESCE(taxpay_tax, taxhist_tax) <> 0) THEN
+      currToBase(cohist_curr_id, cohist_qtyshipped * cohist_unitprice, cohist_invcdate) 
+    ELSE 0
+  END AS salesbase,
+  CASE
+    WHEN ((cohist_misc_type IS NULL OR cohist_misc_type IN ('M','F')) AND COALESCE(taxpay_tax, taxhist_tax) = 0) THEN
+      currToBase(cohist_curr_id, cohist_qtyshipped * cohist_unitprice, cohist_invcdate) 
+    ELSE 0
+  END AS salesbaseexempt,
+  0 AS purchasebase,
+  0 AS purchasebaseexempt,
+  COALESCE(taxpay_tax, taxhist_tax) AS taxlocal,
+  COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate AS taxbase,
+  COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate AS salestaxbase,
+  0 AS reversecharge,
+  0 AS reversechargetax,
+  0 AS purchasetaxbase
+FROM cohisttax
+ JOIN cohist ON (cohist_id=taxhist_parent_id)
+ JOIN taxtype ON (taxtype_id=taxhist_taxtype_id)
+ JOIN tax ON (tax_id=taxhist_tax_id)
+ JOIN curr_symbol ON (curr_id=taxhist_curr_id)
+ LEFT OUTER JOIN taxclass ON (tax_taxclass_id=taxclass_id)
+ LEFT OUTER JOIN taxauth ON (tax_taxauth_id=taxauth_id)
+ LEFT OUTER JOIN taxzone ON (cohist_taxzone_id=taxzone_id)
+ LEFT OUTER JOIN taxpay ON (taxpay_taxhist_id=taxhist_id)
+WHERE ((true)
+<? if exists("distDate") ?>
+ AND (taxhist_distdate BETWEEN <? value("startDate") ?>
+                           AND <? value("endDate") ?>)
+<? else ?>
+ AND (taxhist_docdate BETWEEN <? value("startDate") ?>
+                          AND <? value("endDate") ?>)
+<? endif ?>
+<? if exists("taxauth_id") ?>
+ AND (taxauth_id=<? value("taxauth_id") ?>)
+<? endif ?>
+<? if exists("cashbasedtax") ?>
+ AND (taxpay_id IS NOT NULL)
+<? endif ?>
+)
+
+-- Cash Receipt Miscellaneous Tax Receipts
+UNION ALL
+
+SELECT 1 AS sortorder,
+  tax_code AS tax, tax_descrip,
+  COALESCE(taxauth_code,'') AS taxauth, taxauth_name AS taxauth_descrip,
+  curr_abbr, 
+  CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) <> 0) THEN <? value('sales_taxable') ?>
+    ELSE <? value('sales_nontaxable') ?> END AS source,
+  0 AS qty,
+  (SELECT SUM(cashrcptmisc_amount) FROM cashrcptmisc WHERE cashrcptmisc_cashrcpt_id=cashrcpt_id AND cashrcptmisc_tax_id IS NULL) AS amount,
+  CASE WHEN ( COALESCE(taxpay_tax, taxhist_tax) <> 0) THEN
+  currtobase(cashrcpt_curr_id,
+            (SELECT SUM(cashrcptmisc_amount) FROM cashrcptmisc WHERE cashrcptmisc_cashrcpt_id=cashrcpt_id AND cashrcptmisc_tax_id IS NULL),  
+            cashrcpt_distdate) ELSE 0 END AS salesbase,
+  CASE WHEN ( COALESCE(taxpay_tax, taxhist_tax) = 0) THEN
+  currtobase(cashrcpt_curr_id,
+            (SELECT SUM(cashrcptmisc_amount) FROM cashrcptmisc WHERE cashrcptmisc_cashrcpt_id=cashrcpt_id AND cashrcptmisc_tax_id IS NULL),  
+            cashrcpt_distdate) ELSE 0 END AS salesbaseexempt,
+  0 AS purchasebase,
+  0 AS purchasebaseexempt,
+  COALESCE(taxpay_tax, taxhist_tax) AS taxlocal,
+  COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate AS taxbase,
+  COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate AS salestaxbase,
+  0 AS reversecharge,
+  0 AS reversechargetax,
+  0 AS purchasetaxbase
+FROM cashrcpttax
+ JOIN cashrcpt ON (cashrcpt_id=taxhist_parent_id)
+ JOIN custinfo ON (cashrcpt_cust_id=cust_id)
+ JOIN taxtype ON (taxtype_id=taxhist_taxtype_id)
+ JOIN tax ON (tax_id=taxhist_tax_id)
+ JOIN curr_symbol ON (curr_id=taxhist_curr_id)
+ LEFT OUTER JOIN taxclass ON (tax_taxclass_id=taxclass_id)
+ LEFT OUTER JOIN taxauth ON (tax_taxauth_id=taxauth_id)
+ LEFT OUTER JOIN taxzone ON (cust_taxzone_id=taxzone_id)
+ LEFT OUTER JOIN taxpay ON (taxpay_taxhist_id=taxhist_id)
+WHERE ((true)
+<? if exists("distDate") ?>
+ AND (taxhist_distdate BETWEEN <? value("startDate") ?>
+                           AND <? value("endDate") ?>)
+<? else ?>
+ AND (taxhist_docdate BETWEEN <? value("startDate") ?>
+                          AND <? value("endDate") ?>)
+<? endif ?>
+<? if exists("taxauth_id") ?>
+ AND (taxauth_id=<? value("taxauth_id") ?>)
+<? endif ?>
+<? if exists("cashbasedtax") ?>
+ AND (taxpay_id IS NOT NULL)
+<? endif ?>
+)
+--------------END SALES--------------------
+UNION ALL
+------------BEGIN PURCHASE----------------
+-- A/P Memo history
+SELECT 2 AS sortorder,
+  tax_code AS tax, tax_descrip,
+  COALESCE(taxauth_code,'') AS taxauth, taxauth_name AS taxauth_descrip,
+  curr_abbr, 
+  CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) <> 0) THEN <? value('purchases_taxable') ?> 
+       ELSE <? value('purchases_nontaxable') ?> END AS source,
+  1 AS qty,
+  (apopen_amount - ABS(COALESCE(taxpay_tax, taxhist_tax))) * CASE WHEN (apopen_doctype = 'C') THEN -1 ELSE 1 END AS amount,
+  0 AS salesbase,
+  0 AS salesbaseexempt,
+  CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) <> 0) THEN
+    ((apopen_amount / apopen_curr_rate) - ABS(COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate))
+     * CASE WHEN (apopen_doctype = 'C') THEN -1 ELSE 1 END
+    ELSE 0 END AS purchasebase,
+  CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) = 0) THEN
+    ((apopen_amount / apopen_curr_rate) - ABS(COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate))
+     * CASE WHEN (apopen_doctype = 'C') THEN -1 ELSE 1 END
+    ELSE 0 END AS purchasebaseexempt,  
+  COALESCE(taxpay_tax, taxhist_tax) AS taxlocal,
+  COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate AS taxbase,
+  0 AS salestaxbase,
+  0 AS reversecharge,
+  0 AS reversechargetax,
+  COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate AS purchasetaxbase
+FROM apopentax
+ JOIN apopen ON (apopen_id=taxhist_parent_id)
+ JOIN taxtype ON (taxtype_id=taxhist_taxtype_id)
+ JOIN tax ON (tax_id=taxhist_tax_id)
+ JOIN curr_symbol ON (curr_id=taxhist_curr_id)
+ LEFT OUTER JOIN taxclass ON (tax_taxclass_id=taxclass_id)
+ LEFT OUTER JOIN taxauth ON (tax_taxauth_id=taxauth_id)
+ LEFT OUTER JOIN taxpay ON (taxpay_taxhist_id=taxhist_id)
+WHERE ((NOT taxhist_reverse_charge)
+<? if exists("distDate") ?>
+ AND (taxhist_distdate BETWEEN <? value("startDate") ?>
+                           AND <? value("endDate") ?>)
+<? else ?>
+ AND (taxhist_docdate BETWEEN <? value("startDate") ?>
+                          AND <? value("endDate") ?>)
+<? endif ?>
+<? if exists("taxauth_id") ?>
+ AND (taxauth_id=<? value("taxauth_id") ?>)
+<? endif ?>
+ AND (taxhist_distdate IS NOT NULL)
+<? if exists("cashbasedtax") ?>
+ AND (taxpay_id IS NOT NULL)
+<? endif ?>
+)
+UNION ALL
+--Voucher Header History (Misc. Distributions and Header Freight)
+SELECT 2 AS sortorder,
+  tax_code AS tax, tax_descrip,
+  COALESCE(taxauth_code,'') AS taxauth, taxauth_name AS taxauth_descrip,
+  curr_abbr, 
+  CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) <> 0) THEN <? value('purchases_taxable') ?> 
+       ELSE <? value('purchases_nontaxable') ?> END AS source,
+  1 AS qty,
+  COALESCE((SELECT SUM(vodist_amount) FROM vodist WHERE vodist_vohead_id=v.vohead_id AND (vodist_poitem_id = -1 AND vodist_tax_id = -1)), 0)
+    + COALESCE(vohead_freight,0) AS amount,
+  0 AS salesbase,  
+  0 AS salesbaseexempt,
+  CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) <> 0) THEN
+  (COALESCE((SELECT sum(vodist_amount) FROM vodist WHERE vodist_vohead_id=v.vohead_id AND (vodist_poitem_id = -1 AND vodist_tax_id = -1)), 0)
+    + COALESCE(vohead_freight,0)) / taxhist_curr_rate ELSE 0 END AS purchasebase,
+  CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) = 0) THEN
+  (COALESCE((SELECT sum(vodist_amount) FROM vodist WHERE vodist_vohead_id=v.vohead_id AND (vodist_poitem_id = -1 AND vodist_tax_id = -1)), 0)
+    + COALESCE(vohead_freight,0)) / taxhist_curr_rate ELSE 0 END AS purchasebaseexempt,
+  COALESCE(taxpay_tax, taxhist_tax) AS taxlocal,
+  COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate AS taxbase,
+  0 AS salestaxbase,
+  0 AS reversecharge,
+  0 AS reversechargetax,
+  COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate AS purchasetaxbase
+FROM voheadtax
+ JOIN vohead v ON (vohead_id=taxhist_parent_id)
+ JOIN taxtype ON (taxtype_id=taxhist_taxtype_id)
+ JOIN tax ON (tax_id=taxhist_tax_id)
+ JOIN curr_symbol ON (curr_id=taxhist_curr_id)
+ LEFT OUTER JOIN taxclass ON (tax_taxclass_id=taxclass_id)
+ LEFT OUTER JOIN taxauth ON (tax_taxauth_id=taxauth_id)
+ LEFT OUTER JOIN taxzone ON (vohead_taxzone_id=taxzone_id)
+ LEFT OUTER JOIN taxpay ON (taxpay_taxhist_id=taxhist_id)
+WHERE ((NOT taxhist_reverse_charge)
+<? if exists("distDate") ?>
+ AND (taxhist_distdate BETWEEN <? value("startDate") ?>
+                           AND <? value("endDate") ?>)
+<? else ?>
+ AND (taxhist_docdate BETWEEN <? value("startDate") ?>
+                          AND <? value("endDate") ?>)
+<? endif ?>
+<? if exists("taxauth_id") ?>
+ AND (taxauth_id=<? value("taxauth_id") ?>)
+<? endif ?>
+ AND (taxhist_distdate IS NOT NULL)
+<? if exists("cashbasedtax") ?>
+ AND (taxpay_id IS NOT NULL)
+<? endif ?>
+)
+UNION ALL
+-- Voucher Line Item (including Line Freight)
+SELECT 2 AS sortorder,
+  tax_code AS tax, tax_descrip,
+  COALESCE(taxauth_code,'') AS taxauth, taxauth_name AS taxauth_descrip,
+  curr_abbr, 
+  CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) <> 0) THEN <? value('purchases_taxable') ?> 
+       ELSE <? value('purchases_nontaxable') ?> END AS source,
+  SUM(voitem_qty) AS qty,
+  CASE WHEN (taxhist_taxtype_id=getfreighttaxtypeid()) THEN COALESCE(SUM(voitem_freight),0) ELSE COALESCE(SUM(vodist_amount),0) END AS amount,
+  0 AS salesbase,
+  0 AS salesbaseexempt,
+  CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) <> 0) THEN 
+  currToBase(vohead_curr_id, CASE WHEN (taxhist_taxtype_id=getfreighttaxtypeid()) THEN coalesce(SUM(voitem_freight),0) 
+                                                                                  ELSE COALESCE(SUM(vodist_amount),0) 
+                                  END, vohead_distdate) ELSE 0 END AS purchasebase,
+CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) = 0) THEN 
+  currToBase(vohead_curr_id, CASE WHEN (taxhist_taxtype_id=getfreighttaxtypeid()) THEN coalesce(SUM(voitem_freight),0) 
+                                                                                  ELSE COALESCE(SUM(vodist_amount),0) 
+                                  END, vohead_distdate) ELSE 0 END AS purchasebaseexempt,  
+  COALESCE(taxpay_tax, taxhist_tax) AS taxlocal,
+  COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate AS taxbase,
+  0 AS salestaxbase,
+  0 AS reversecharge,
+  0 AS reversechargetax,
+  COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate AS purchasetaxbase
+FROM voitemtax
+ JOIN voitem ON (voitem_id=taxhist_parent_id)
+ JOIN vohead ON (vohead_id=voitem_vohead_id)
+ JOIN vodist ON (vodist_vohead_id=vohead_id AND vodist_poitem_id=voitem_poitem_id)
+ JOIN taxtype ON (taxtype_id=taxhist_taxtype_id)
+ JOIN tax ON (tax_id=taxhist_tax_id)
+ JOIN curr_symbol ON (curr_id=taxhist_curr_id)
+ LEFT OUTER JOIN taxclass ON (tax_taxclass_id=taxclass_id)
+ LEFT OUTER JOIN taxauth ON (tax_taxauth_id=taxauth_id)
+ LEFT OUTER JOIN taxzone ON (vohead_taxzone_id=taxzone_id)
+ LEFT OUTER JOIN taxpay ON (taxpay_taxhist_id=taxhist_id)
+WHERE ((NOT taxhist_reverse_charge)
+<? if exists("distDate") ?>
+ AND (taxhist_distdate BETWEEN <? value("startDate") ?>
+                           AND <? value("endDate") ?>)
+<? else ?>
+ AND (taxhist_docdate BETWEEN <? value("startDate") ?>
+                          AND <? value("endDate") ?>)
+<? endif ?>
+<? if exists("taxauth_id") ?>
+ AND (taxauth_id=<? value("taxauth_id") ?>)
+<? endif ?>
+ AND (taxhist_distdate IS NOT NULL)
+<? if exists("cashbasedtax") ?>
+ AND (taxpay_id IS NOT NULL)
+<? endif ?>
+)
+GROUP BY taxhist_id, taxpay_distdate,taxhist_distdate,tax_code,tax_descrip,
+  taxtype_name,taxtype_descrip,taxclass_code,taxclass_descrip,
+  taxauth_code,taxauth_descrip,taxzone,taxzone_descrip,curr_abbr,
+  vohead_number,vohead_curr_id,vohead_distdate,vohead_docdate,
+  taxhist_tax,taxhist_curr_rate,voitem_qty, taxhist_journalnumber, taxpay_tax
+
+UNION ALL
+-- Miscellaneous Checks
+SELECT 2 AS sortorder,
+  tax_code AS tax, tax_descrip,
+  COALESCE(taxauth_code,'none') AS taxauth, taxauth_name AS taxauth_descrip,
+  curr_abbr, 
+  CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) <> 0) THEN <? value('purchases_taxable') ?> 
+       ELSE <? value('purchases_nontaxable') ?> END AS source,
+  1 AS qty,
+  checkhead_amount - ABS(COALESCE(taxpay_tax, taxhist_tax)) AS amount,
+  0 AS salesbase,
+  0 AS salesbaseexempt,
+  CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) <> 0) THEN
+  (checkhead_amount / taxhist_curr_rate) - ABS(COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate) ELSE 0 END AS purchasebase,
+  CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) = 0) THEN
+  (checkhead_amount / taxhist_curr_rate) - ABS(COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate) ELSE 0 END AS purchasebaseexempt,
+  COALESCE(taxpay_tax, taxhist_tax) AS taxlocal,
+  COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate AS taxbase,
+  0 AS salestaxbase,
+  0 AS reversecharge,
+  0 AS reversechargetax,
+  COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate AS purchasetaxbase
+FROM checkheadtax
+ JOIN checkhead ON (checkhead_id=taxhist_parent_id)
+ JOIN taxtype ON (taxtype_id=taxhist_taxtype_id)
+ JOIN tax ON (tax_id=taxhist_tax_id)
+ JOIN curr_symbol ON (curr_id=taxhist_curr_id)
+ LEFT OUTER JOIN taxclass ON (tax_taxclass_id=taxclass_id)
+ LEFT OUTER JOIN taxauth ON (tax_taxauth_id=taxauth_id)
+ LEFT OUTER JOIN taxzone ON (checkhead_taxzone_id=taxzone_id)
+ LEFT OUTER JOIN taxpay ON (taxpay_taxhist_id=taxhist_id)
+WHERE ((checkhead_misc)
+<? if exists("distDate") ?>
+ AND (taxhist_distdate BETWEEN <? value("startDate") ?>
+                           AND <? value("endDate") ?>)
+<? else ?>
+ AND (taxhist_docdate BETWEEN <? value("startDate") ?>
+                          AND <? value("endDate") ?>)
+<? endif ?>
+<? if exists("taxauth_id") ?>
+ AND (taxauth_id=<? value("taxauth_id") ?>)
+<? endif ?>
+ AND (taxhist_distdate IS NOT NULL)
+<? if exists("cashbasedtax") ?>
+ AND (taxpay_id IS NOT NULL)
+<? endif ?>
+)
+-------------END PURCHASE--------------
+-------------REVERSE CHARGES--------------
+UNION ALL
+
+-- A/P Memo Reverse Charges
+SELECT 3 AS sortorder,
+  tax_code AS tax, tax_descrip,
+  COALESCE(taxauth_code,'') AS taxauth, taxauth_name AS taxauth_descrip,
+  curr_abbr, 
+  <? value('reversecharges') ?> AS source,
+  1 AS qty,
+  apopen_amount - ABS(COALESCE(taxpay_tax, taxhist_tax)) AS amount,
+  CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) <> 0) THEN
+    (apopen_amount / apopen_curr_rate) - ABS(COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate) ELSE 0 END AS salesbase,
+  0 AS salesbaseexempt,
+  0 AS purchasebase,
+  0 AS purchasebaseexempt,  
+  COALESCE(taxpay_tax, taxhist_tax) AS taxlocal,
+  COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate AS taxbase,
+  COALESCE(taxpay_tax, taxhist_tax) AS salestaxbase,
+  CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) <> 0) THEN
+    (apopen_amount / apopen_curr_rate) - ABS(COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate) ELSE 0 END AS reversecharge,
+  COALESCE(taxpay_tax, taxhist_tax) AS reversechargetax,
+  0 AS purchasetaxbase
+FROM apopentax
+ JOIN apopen ON (apopen_id=taxhist_parent_id)
+ JOIN taxtype ON (taxtype_id=taxhist_taxtype_id)
+ JOIN tax ON (tax_id=taxhist_tax_id)
+ JOIN curr_symbol ON (curr_id=taxhist_curr_id)
+ LEFT OUTER JOIN taxclass ON (tax_taxclass_id=taxclass_id)
+ LEFT OUTER JOIN taxauth ON (tax_taxauth_id=taxauth_id)
+ LEFT OUTER JOIN taxpay ON (taxpay_taxhist_id=taxhist_id)
+WHERE ((taxhist_reverse_charge)
+<? if exists("distDate") ?>
+ AND (taxhist_distdate BETWEEN <? value("startDate") ?>
+                           AND <? value("endDate") ?>)
+<? else ?>
+ AND (taxhist_docdate BETWEEN <? value("startDate") ?>
+                          AND <? value("endDate") ?>)
+<? endif ?>
+<? if exists("taxauth_id") ?>
+ AND (taxauth_id=<? value("taxauth_id") ?>)
+<? endif ?>
+ AND (taxhist_distdate IS NOT NULL)
+<? if exists("cashbasedtax") ?>
+ AND (taxpay_id IS NOT NULL)
+<? endif ?>
+)
+UNION ALL
+--Voucher Header Reverse Charges
+SELECT 3 AS sortorder,
+  tax_code AS tax, tax_descrip,
+  COALESCE(taxauth_code,'') AS taxauth, taxauth_name AS taxauth_descrip,
+  curr_abbr, 
+  <? value('reversecharges') ?> AS source,
+  1 AS qty,
+  COALESCE((SELECT SUM(vodist_amount) FROM vodist WHERE vodist_vohead_id=v.vohead_id AND (vodist_poitem_id = -1 AND vodist_tax_id = -1)), 0)
+    + COALESCE(vohead_freight,0) AS amount,
+  CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) <> 0) THEN
+  (COALESCE((SELECT sum(vodist_amount) FROM vodist WHERE vodist_vohead_id=v.vohead_id AND (vodist_poitem_id = -1 AND vodist_tax_id = -1)), 0)
+    + COALESCE(vohead_freight,0)) / taxhist_curr_rate ELSE 0 END AS salesbase,  
+  0 AS salesbaseexempt,
+  0 AS purchasebase,
+  0 AS purchasebaseexempt,
+  COALESCE(taxpay_tax, taxhist_tax) AS taxlocal,
+  COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate AS taxbase,
+  COALESCE(taxpay_tax, taxhist_tax) AS salestaxbase,
+  CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) <> 0) THEN
+  (COALESCE((SELECT sum(vodist_amount) FROM vodist WHERE vodist_vohead_id=v.vohead_id AND (vodist_poitem_id = -1 AND vodist_tax_id = -1)), 0)
+    + COALESCE(vohead_freight,0)) / taxhist_curr_rate ELSE 0 END AS reversecharge,
+  COALESCE(taxpay_tax, taxhist_tax) AS reversechargetax,
+  0 AS purchasetaxbase
+FROM voheadtax
+ JOIN vohead v ON (vohead_id=taxhist_parent_id)
+ JOIN taxtype ON (taxtype_id=taxhist_taxtype_id)
+ JOIN tax ON (tax_id=taxhist_tax_id)
+ JOIN curr_symbol ON (curr_id=taxhist_curr_id)
+ LEFT OUTER JOIN taxclass ON (tax_taxclass_id=taxclass_id)
+ LEFT OUTER JOIN taxauth ON (tax_taxauth_id=taxauth_id)
+ LEFT OUTER JOIN taxzone ON (vohead_taxzone_id=taxzone_id)
+ LEFT OUTER JOIN taxpay ON (taxpay_taxhist_id=taxhist_id)
+WHERE ((taxhist_reverse_charge)
+<? if exists("distDate") ?>
+ AND (taxhist_distdate BETWEEN <? value("startDate") ?>
+                           AND <? value("endDate") ?>)
+<? else ?>
+ AND (taxhist_docdate BETWEEN <? value("startDate") ?>
+                          AND <? value("endDate") ?>)
+<? endif ?>
+<? if exists("taxauth_id") ?>
+ AND (taxauth_id=<? value("taxauth_id") ?>)
+<? endif ?>
+ AND (taxhist_distdate IS NOT NULL)
+<? if exists("cashbasedtax") ?>
+ AND (taxpay_id IS NOT NULL)
+<? endif ?>
+)
+UNION ALL
+-- Voucher Line Item Reverse Charges
+SELECT 3 AS sortorder,
+  tax_code AS tax, tax_descrip,
+  COALESCE(taxauth_code,'') AS taxauth, taxauth_name AS taxauth_descrip,
+  curr_abbr, 
+  <? value('reversecharges') ?> AS source,
+  SUM(voitem_qty) AS qty,
+  CASE WHEN (taxhist_taxtype_id=getfreighttaxtypeid()) THEN COALESCE(SUM(voitem_freight),0) ELSE COALESCE(SUM(vodist_amount),0) END AS amount,
+    CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) <> 0) THEN 
+  currToBase(vohead_curr_id, CASE WHEN (taxhist_taxtype_id=getfreighttaxtypeid()) THEN coalesce(SUM(voitem_freight),0) 
+                                                                                  ELSE COALESCE(SUM(vodist_amount),0) 
+                                  END, vohead_distdate) ELSE 0 END AS salesbase,
+  0 AS salesbaseexempt,
+  0 AS purchasebase,
+  0 AS purchasebaseexempt,  
+  COALESCE(taxpay_tax, taxhist_tax) AS taxlocal,
+  COALESCE(taxpay_tax, taxhist_tax) / taxhist_curr_rate AS taxbase,
+  COALESCE(taxpay_tax, taxhist_tax) AS salestaxbase,
+  CASE WHEN (COALESCE(taxpay_tax, taxhist_tax) <> 0) THEN 
+  currToBase(vohead_curr_id, CASE WHEN (taxhist_taxtype_id=getfreighttaxtypeid()) THEN coalesce(SUM(voitem_freight),0) 
+                                                                                  ELSE COALESCE(SUM(vodist_amount),0) 
+                                  END, vohead_distdate) ELSE 0 END AS reversecharge,
+  COALESCE(taxpay_tax, taxhist_tax) AS reversechargetax,
+  0 AS purchasetaxbase
+FROM voitemtax
+ JOIN voitem ON (voitem_id=taxhist_parent_id)
+ JOIN vohead ON (vohead_id=voitem_vohead_id)
+ JOIN vodist ON (vodist_vohead_id=vohead_id)
+ JOIN taxtype ON (taxtype_id=taxhist_taxtype_id)
+ JOIN tax ON (tax_id=taxhist_tax_id)
+ JOIN curr_symbol ON (curr_id=taxhist_curr_id)
+ LEFT OUTER JOIN taxclass ON (tax_taxclass_id=taxclass_id)
+ LEFT OUTER JOIN taxauth ON (tax_taxauth_id=taxauth_id)
+ LEFT OUTER JOIN taxzone ON (vohead_taxzone_id=taxzone_id)
+ LEFT OUTER JOIN taxpay ON (taxpay_taxhist_id=taxhist_id)
+WHERE ((taxhist_reverse_charge)
+<? if exists("distDate") ?>
+ AND (taxhist_distdate BETWEEN <? value("startDate") ?>
+                           AND <? value("endDate") ?>)
+<? else ?>
+ AND (taxhist_docdate BETWEEN <? value("startDate") ?>
+                          AND <? value("endDate") ?>)
+<? endif ?>
+<? if exists("taxauth_id") ?>
+ AND (taxauth_id=<? value("taxauth_id") ?>)
+<? endif ?>
+ AND (taxhist_distdate IS NOT NULL)
+<? if exists("cashbasedtax") ?>
+ AND (taxpay_id IS NOT NULL)
+<? endif ?>
+)
+GROUP BY taxhist_id, taxpay_distdate,taxhist_distdate,tax_code,tax_descrip,
+  taxtype_name,taxtype_descrip,taxclass_code,taxclass_descrip,
+  taxauth_code,taxauth_descrip,taxzone,taxzone_descrip,curr_abbr,
+  vohead_number,vohead_curr_id,vohead_distdate,vohead_docdate,
+  taxhist_tax,taxhist_curr_rate,voitem_qty, taxhist_journalnumber, taxpay_tax
+
+-------------END REVERSE CHARGES--------------
+
+) AS data
+GROUP BY taxauth, taxauth_descrip, sortorder, source
+ORDER BY taxauth, sortorder, source

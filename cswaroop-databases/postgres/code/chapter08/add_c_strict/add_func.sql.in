@@ -1,0 +1,13 @@
+
+
+CREATE OR REPLACE FUNCTION add(a int,b int) RETURNS int
+     AS 'MODULE_PATHNAME', 'add_ab'
+     LANGUAGE C STRICT;
+
+-- the official name of float8 is "double precision"
+-- but we use float8 here as it is shorter :)
+
+CREATE FUNCTION add(a float8, b float8 b) RETURNS float8
+     AS 'MODULE_PATHNAME', 'add_ab_float8'
+     LANGUAGE C STRICT;
+

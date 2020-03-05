@@ -1,0 +1,12 @@
+CREATE OR REPLACE FUNCTION fact(x int) 
+  RETURNS int
+AS $$
+    global x
+    assert x>=0, "argument must be a positive integer"
+    f = 1
+    while (x > 0):
+        f = f * x
+        x = x - 1
+    return f
+$$ LANGUAGE plpythonu;
+

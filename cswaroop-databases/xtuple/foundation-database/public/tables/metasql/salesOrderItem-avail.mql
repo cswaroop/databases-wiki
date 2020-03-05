@@ -1,0 +1,32 @@
+-- Group: salesOrderItem
+-- Name: avail
+-- Notes: used by salesOrderItem
+--        Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+
+SELECT itemsite_id,
+       availableqoh,
+       (allocated - <? value('qtyOrdered') ?>) AS allocated,
+       noNeg(availableqoh - allocated - <? value('qtyOrdered') ?>) AS unallocated,
+       (ordered - <? value('supplyOrderQty') ?>) AS ordered,
+       noNeg(availableqoh - allocated + ordered + <? value('qtyOrdered') ?> - <? value('supplyOrderQty') ?>) AS available,
+       reserved,
+       reservable,
+       itemsite_leadtime
+FROM ( SELECT itemsite_id, qtyAvailable(itemsite_id) AS availableqoh,
+              qtyAllocated(itemsite_id, DATE(<? value('date') ?>) + <? value('offset') ?>) AS allocated,
+              qtyOrdered(itemsite_id, DATE(<? value('date') ?>) + <? value('offset') ?>) AS ordered,
+<? if exists('includeReservations') ?>
+              COALESCE((SELECT coitem_qtyreserved
+                        FROM coitem
+                        WHERE coitem_id=<? value('soitem_id') ?>), 0.0) AS reserved,
+              (qtyAvailable(itemsite_id) - qtyreserved(itemsite_id)) AS reservable,
+<? else ?>
+              0.0 AS reserved,
+              0.0 AS reservable,
+<? endif ?>
+              itemsite_leadtime
+       FROM itemsite JOIN item ON (item_id=itemsite_item_id)
+      WHERE (itemsite_item_id=<? value('item_id') ?>)
+        AND (itemsite_warehous_id=<? value('warehous_id') ?>)
+     ) AS data;

@@ -1,0 +1,24 @@
+-- Group: pricingSchedules
+-- Name:  detail
+-- Notes: used by itemPricingSchedules
+--        Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+SELECT *,
+       CASE WHEN COALESCE(ipshead_effective, startOfTime()) <= startOfTime() THEN <? value('always') ?>
+       END AS ipshead_effective_qtdisplayrole,
+       CASE WHEN COALESCE(ipshead_expires, endOfTime()) >= endOfTime() THEN <? value('never') ?>
+       END AS ipshead_expires_qtdisplayrole
+FROM ipshead
+WHERE (true)
+<? if exists("showUnexpired") ?>
+  AND (ipshead_expires > CURRENT_DATE)
+<? endif ?>
+<? if exists("showUneffective") ?>
+  AND (ipshead_effective <= CURRENT_DATE)
+<? endif ?>
+<? if exists("listpricesched") ?>
+  AND (ipshead_listprice)
+<? else ?>
+  AND (NOT ipshead_listprice)
+<? endif ?>
+ORDER BY ipshead_name, ipshead_effective;

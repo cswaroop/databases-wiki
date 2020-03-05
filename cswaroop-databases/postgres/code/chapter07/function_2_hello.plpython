@@ -1,0 +1,6 @@
+CREATE FUNCTION hello(name text)
+  RETURNS text
+AS $$
+    return 'hello %s !' %  name
+$$ LANGUAGE plpythonu;
+

@@ -1,0 +1,11 @@
+CREATE OR REPLACE FUNCTION array_to_rows( array_in ANYARRAY )
+  RETURNS TABLE(row_out ANYELEMENT)
+AS $$
+BEGIN
+    FOR i IN 1.. array_upper(array_in,1) LOOP
+         row_out =  array_in[i];   
+         RETURN NEXT ;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+

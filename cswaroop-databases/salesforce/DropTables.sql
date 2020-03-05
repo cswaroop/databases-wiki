@@ -1,0 +1,11 @@
+DROP TABLE mt_audit;
+DROP TABLE mt_clobs;
+DROP TABLE mt_fallback_indexes;
+DROP TABLE mt_indexes;
+DROP TABLE mt_mru_indexes;
+DROP TABLE mt_name_denorm;
+DROP TABLE mt_objects;
+DROP TABLE mt_relationships;
+DROP TABLE mt_tables;
+DROP TABLE mt_unique_indexes;
+DROP TABLE org;

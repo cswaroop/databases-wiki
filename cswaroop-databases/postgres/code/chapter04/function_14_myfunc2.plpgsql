@@ -1,0 +1,8 @@
+CREATE FUNCTION myfunc2(cur1 refcursor, cur2 refcursor)
+RETURNS VOID AS $$
+BEGIN
+    OPEN cur1 FOR SELECT * FROM table_1;
+    OPEN cur2 FOR SELECT * FROM table_2;
+END;
+$$ LANGUAGE plpgsql;
+

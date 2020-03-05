@@ -1,0 +1,15 @@
+
+-- this works, but is really bad programming style
+
+CREATE OR REPLACE FUNCTION ambiguous(parameter varchar) RETURNS integer  AS $$
+ DECLARE retval integer;
+BEGIN
+
+ INSERT INTO parameter (parameter) VALUES (parameter) RETURNING id INTO retval;
+ RETURN retval;
+
+END
+$$
+language plpgsql;
+
+SELECT ambiguous ('parameter');

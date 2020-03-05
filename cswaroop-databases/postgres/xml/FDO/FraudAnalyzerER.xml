@@ -1,0 +1,65 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="Consumer" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ait="http://dataorchestrator.fico.com/activityinput" xmlns:dat="http://dataorchestrator.fico.com/data" xmlns:aut="http://dataorchestrator.fico.com/authorization" xmlns:flw="http://dataorchestrator.fico.com/workflow" xmlns:wor="http://dataorchestrator.fico.com/workitem" xmlns:ws="http://ws.dataorchestrator.fico.com/" xmlns:res="http://dataorchestrator.fico.com/response">    
+    <soapenv:Header/>
+    <soapenv:Body>
+        <ws:getResponse>
+
+            <!--Zero or more repetitions:-->
+            <ait:ActivityInput Ref="1" xsi:type="ait:BureauActivityInput">
+            	<InquiryParameter Name="ServiceCode" Value="SL6"/>
+	            <InquiryParameter Name="ProductId" Value="FraudAnalyserER"/>
+     	       <InquiryParameter Name="UserId" Value="F0028001"/>
+          	  <InquiryParameter Name="Password" Value="Sr8b2RAs"/>
+                 <InquiryParameter Name="ProductNamespace" Value="urn:crif-FraudAnalyserER:2016-05-25"/>
+	            <InquiryParameter Name="GroupId" Value="ec30a2a8-0889-45ad-9c73-c8764f9ed8f8"/>
+     	       <InquiryParameter Name="TransformNamespace" Value="urn:crif-messagegateway:2006-08-23"/>
+     	       <InquiryParameter Name="ScipafiFlag" Value="1"/>
+            </ait:ActivityInput>
+                                                 
+            <!--Zero or more repetitions:-->
+            <dat:Data xsi:type="ns1:Consumer" 
+            		  Ref="1" MessageId="06042ddfdfdfdddfdfffdfdf01dfd7017"  
+            		  FirstName="MICAELA" 
+          		  LastName="BOLDI" 
+          		  BirthDate="1974-08-13" 
+          		  Gender="F" 
+          		  BirthPlace="MILANO" 
+          		  BirthProvince="MI"
+          		  Country="I" 
+          		  TaxCode="BLDMCL74M53F205Q" 
+          		  ForceName="false" 
+          		  ForceTown="false" 
+          		  ForceTaxCode="false"
+          		  FraudAnalyserDetail="2" 
+         	
+          		  PrimaryCitizenship="I" 
+     >
+          		  
+      		<Address AddressType="A"  
+      			    StreetName="VIA MARCONI RES CAMPO" 
+      			    StreetNumber="111" 
+      			    Town="BASIGLIO" 
+          		    Province="MI" 
+          		    Zip="20080" 
+          		    Country="I" />
+
+   
+
+            </dat:Data>
+
+            <!--Zero or more repetitions:-->
+            <flw:WorkFlow Ref="TestFlow">
+                <Activity xsi:type="flw:BureauActivity" Ref="1" ProviderName="CRIFConsumer" ParameterRef="1">
+                    <Output Name="BureauRequest"/>
+                    <Output Name="BureauResponse"/>
+                    <Output Name="ReadableResponse"/>
+                </Activity>
+            </flw:WorkFlow>
+            
+            <!--Zero or more repetitions:-->
+            <wor:WorkItem Ref="1" FlowRef="TestFlow">
+                <ItemData DataRef="1"/>
+            </wor:WorkItem>
+
+        </ws:getResponse>
+    </soapenv:Body>
+</soapenv:Envelope>

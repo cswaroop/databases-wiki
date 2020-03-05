@@ -1,0 +1,10 @@
+CREATE TYPE abc AS (a int, b int, c int);
+
+CREATE FUNCTION permutations2(ia int, ib int, ic int)
+  RETURNS SETOF abc                 
+AS $$
+BEGIN
+    RETURN NEXT a,b,c;
+END;
+$$ LANGUAGE plpgsql;
+

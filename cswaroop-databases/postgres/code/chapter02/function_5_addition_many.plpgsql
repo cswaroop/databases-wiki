@@ -1,0 +1,10 @@
+
+CREATE OR REPLACE FUNCTION addition (VARIADIC arr integer[]) RETURNS integer
+AS $$
+DECLARE retval integer;
+BEGIN
+	SELECT sum($1[i]) INTO retval FROM generate_subscripts($1, 1) g(i) ;
+	RETURN retval;
+END;
+$$
+LANGUAGE plpgsql;

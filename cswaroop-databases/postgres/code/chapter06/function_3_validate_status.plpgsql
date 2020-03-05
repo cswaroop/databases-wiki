@@ -1,0 +1,16 @@
+CREATE OR REPLACE FUNCTION get_us_zip_validation_status(zipcode text) returns text
+AS
+$$
+BEGIN
+	SELECT validate_us_zip(zipcode);
+	RETURN 'Passed Validation';
+EXCEPTION
+	WHEN SQLSTATE 'P9999' THEN RETURN 'Non-US Zip Code';
+	WHEN SQLSTATE 'P9998' THEN RETURN 'Not enough digits.';
+	WHEN SQLSTATE 'P9997' THEN RETURN 'Too many digits.';
+	WHEN SQLSTATE 'P9996' THEN RETURN 'Between 6 and 8 digits.';
+	RAISE;  -- Some other SQL error.	
+END;
+$$
+LANGUAGE 'plpgsql';
+

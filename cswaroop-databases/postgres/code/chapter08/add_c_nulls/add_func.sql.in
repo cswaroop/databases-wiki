@@ -1,0 +1,6 @@
+
+
+CREATE OR REPLACE FUNCTION add(a int,b int) RETURNS int
+     AS 'MODULE_PATHNAME', 'add_ab_null'
+     LANGUAGE C ;
+

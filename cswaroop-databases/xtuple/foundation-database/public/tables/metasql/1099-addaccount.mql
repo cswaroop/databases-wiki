@@ -1,0 +1,8 @@
+-- Group: 1099
+-- Name:  addaccount
+-- Notes: changes 1099 flag on account
+-- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- See www.xtuple.com/CPAL for the full text of the software license.
+
+update accnt set accnt_1099_form_type=<? value("box") ?>
+where accnt_id=<? value("accnt_id") ?>;

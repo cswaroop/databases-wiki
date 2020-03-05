@@ -1,0 +1,262 @@
+/*
+  Styles relating to the grid box
+*/
+@widgetFontSize: 13px;
+@gridIconWidth: 4px;
+@gridIconPadding: 2px;
+@gridFieldDecoratorWidth: 100%;
+@gridFieldWidth: @gridFieldDecoratorWidth - (2 * @decoratorPadding);
+@iconGridFieldWidth: @gridFieldWidth - @gridIconWidth - (2 * @gridIconPadding);
+
+
+/* Entire box including the grid and the summary panel */
+.xv-grid-box {
+
+  &.small-panel {
+    width: 600px;
+  }
+
+  &.medium-panel {
+    width: 700px;
+  }
+
+  &.large-panel {
+    width: 800px;
+  }
+
+  .enyo-list-page {
+    > *:first-child {
+      .xv-grid-row {
+        border-top: 0;
+      }
+    }
+  }
+
+  .xv-above-grid-list {
+    border: 0;
+  }
+
+  .xv-scroller {
+    background: @ghost;
+  }
+
+  .xv-grid-attr {
+    .xv-limit-description
+
+    &.bold {
+    font-weight: bold;
+    }
+    &.error {
+      color: @bright-red;
+    }
+    &.emphasis {
+      color: @green;
+    }
+    &.warn {
+      color: @light-orange;
+    }
+    &.italic {
+      font-style: italic;
+    }
+    &.placeholder {
+      font-style: italic;
+      color: @blue-gray;
+    }
+    &.hyperlink {
+      color: blue;
+    }
+  }
+
+  .xv-gridbox-button {
+    color: @slate-blue;
+    font-size: 18px;
+    border: none;
+    background: transparent;
+  }
+
+
+  /**
+    This is the most general grid row that
+    is not specific to read-only or selected
+  */
+  .xv-grid-row {
+    font-size: 12px;
+    background-color: @gray;
+    border-bottom: 1px solid @silver;
+    > * {
+      display: inline-block;
+    }
+    vertical-align: top;
+
+    /**
+      This is the grid header row
+    */
+    .xv-grid-header {
+      background-color: @smoke;
+      color: @near-black;
+      font-size: .8em;
+      font-weight: bold;
+      text-transform: uppercase;
+      padding-top: 4px;
+      &.last {
+        border-right: none;
+      }
+    }
+    > * {
+      padding: 6px 4px;
+      border: none;
+    }
+
+    .line-number {
+      vertical-align: top;
+      width: 30px;
+      text-align: right;
+    }
+    .grid-actions {
+      display: block;
+      padding-left: 30px;
+      border-radius: 4px;
+      border-width: 0;
+      background: @earl-grey;
+      margin: 6px;
+      > * {
+        display: inline-block;
+        width: 100%;
+      }
+    }
+    .grid-item {
+      vertical-align: top;
+      width: 175px;
+    }
+    .quantity {
+      vertical-align: top;
+      text-align: right;
+      width: 100px;
+    }
+    .percent {
+      vertical-align: top;
+      text-align: right;
+      width: 90px;
+    }
+    .price {
+      vertical-align: top;
+      text-align: right;
+      width: 90px;
+    }
+    .date {
+      vertical-align: top;
+      width: 105px;
+    }
+    .user {
+      vertical-align: top;
+      width: 100px;
+    }
+
+    &.readonly {
+      background: @ghost;
+      min-height: 56px;
+    }
+
+    &.selected {
+      background-color: @white;
+      border: 1px solid @bright-orange;
+      .xv-grid-column {
+        .onyx-input-decorator {
+          .tightened-input-decorator(100%);
+        }
+        .onyx-picker-decorator {
+          padding-top: 6px;
+          width: 100%;
+          .onyx-button {
+            height: 26px;
+            padding-top: 3px;
+            width: 100%;
+            font-size: @widgetFontSize;
+          }
+        }
+        .xv-input {
+          padding-top: 6px;
+          width: @gridFieldDecoratorWidth;
+          border: none;
+
+        }
+        .xv-label, .xv-flexible-label, .xv-picker-label {
+          display: none;
+        }
+        .xv-relationwidget {
+          .xv-description {
+            margin: 0;
+            margin-top: 5px;
+          }
+          &.xv-private-item-site-widget {
+            border-bottom: 0;
+          }
+          .onyx-input-decorator {
+            .tightened-input-decorator;
+          }
+        }
+        .xv-datewidget {
+          .onyx-input-decorator {
+            .tightened-input-decorator;
+          }
+        }
+        .xv-combobox {
+          .onyx-input-decorator {
+            .tightened-input-decorator;
+          }
+        }
+        .xv-useraccount-widget {
+          .xv-input {
+            width: 80px;
+            height: 16px;
+          }
+        }
+      }
+    }
+  }
+  &.xv-groupbox {
+    .xv-sales-summary-panel {
+      border: none;
+      margin-top: 0;
+      padding-left: 0;
+      padding-right: 0;
+      .xv-sales-summary-total-group {
+        padding: 0;
+        border: none;
+        .xv-moneywidget {
+          padding-bottom: 0;
+          padding-top: 0;
+          .xv-input-decorator {
+            padding-bottom: 0;
+            padding-top: 0;
+          }
+        }
+        .xv-numberwidget {
+          padding-bottom: 0;
+          padding-top: 0;
+          .xv-input-decorator {
+            width: 163px;
+            padding-bottom: 0;
+            padding-top: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+.xv-grid-list {
+  .xv-list-column {
+    vertical-align: top !important;
+  }
+}
+
+.tightened-input-decorator (@inputWidth: @iconGridFieldWidth) {
+  padding: 0;
+  width: @gridFieldDecoratorWidth;
+  margin: 0;
+  input {
+    width: @inputWidth;
+    font-size: @widgetFontSize;
+  }
+}

@@ -1,0 +1,70 @@
+-- Group: voucher
+-- Name:  poitems
+-- Notes: used by voucher
+-- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- See www.xtuple.com/CPAL for the full text of the software license.
+SELECT poitem_id, poitem_linenumber,
+       CASE WHEN(poitem_status='C') THEN <? value('closed') ?>
+            WHEN(poitem_status='U') THEN <? value('unposted') ?>
+            WHEN(poitem_status='O' AND ((poitem_qty_received-poitem_qty_returned) > 0) AND (poitem_qty_ordered>(poitem_qty_received-poitem_qty_returned))) THEN <? value('partial') ?>
+            WHEN(poitem_status='O' AND ((poitem_qty_received-poitem_qty_returned) > 0) AND (poitem_qty_ordered<=(poitem_qty_received-poitem_qty_returned))) THEN <? value('received') ?>
+            WHEN(poitem_status='O') THEN <? value('open') ?>
+            ELSE poitem_status
+            END AS poitemstatus,
+      COALESCE(item_number, poitem_vend_item_number) AS itemnumber,
+      COALESCE(uom_name, poitem_vend_uom) AS uom,
+      poitem_vend_item_number, poitem_vend_uom,
+      poitem_qty_ordered,
+      ( SELECT COALESCE(SUM(recv_qty), 0)
+               FROM recv
+               WHERE ( (recv_posted)
+               AND (recv_invoiced)
+               AND (recv_order_type='PO')
+               AND (recv_orderitem_id=poitem_id) ) ) AS qtyinvoiced,
+      ( SELECT COALESCE(SUM(recv_qty), 0)
+               FROM recv
+               WHERE ( (recv_posted)
+               AND (NOT recv_invoiced)
+               AND (recv_vohead_id IS NULL)
+               AND (recv_order_type='PO')
+               AND (recv_orderitem_id=poitem_id) ) ) AS qtyreceived,
+      ( SELECT COALESCE(SUM(poreject_qty), 0)
+               FROM poreject
+               WHERE ( (poreject_posted)
+               AND (NOT poreject_invoiced)
+               AND (poreject_vohead_id IS NULL)
+               AND (poreject_poitem_id=poitem_id) ) ) AS qtyrejected,
+      ( SELECT COALESCE(SUM(vodist_qty), 0)
+               FROM vodist
+               WHERE vodist_poitem_id=poitem_id
+               AND vodist_vohead_id=<? value('vohead_id') ?> ) AS invoiceqty, 
+      ( SELECT COALESCE(SUM(vodist_amount), 0)
+               FROM vodist
+               WHERE vodist_poitem_id=poitem_id
+               AND vodist_vohead_id=<? value('vohead_id') ?> ) 
+             + ( SELECT COALESCE(SUM(COALESCE(voitem_freight,0)), 0)
+                        FROM voitem
+                        WHERE voitem_poitem_id=poitem_id
+                          AND   voitem_vohead_id=<? value('vohead_id') ?> ) AS invoiceamount,
+      poitem_unitprice,
+      (poitem_unitprice * poitem_qty_ordered) AS extprice,
+      poitem_freight,
+      'qty' AS poitem_qty_ordered_xtnumericrole,
+      'qty' AS qtyinvoiced_xtnumericrole,
+      'qty' AS qtyreceived_xtnumericrole,
+      'qty' AS qtyrejected_xtnumericrole,
+      'qty' AS invoiceqty_xtnumericrole,
+      'curr' AS invoiceamount_xtnumericrole,
+      'purchprice' AS poitem_unitprice_xtnumericrole,
+      'curr' AS extprice_xtnumericrole,
+      'curr' AS poitem_freight_xtnumericrole 
+FROM poitem JOIN pohead ON (pohead_id=poitem_pohead_id)
+LEFT OUTER JOIN ( itemsite JOIN item ON (itemsite_item_id=item_id)
+                           JOIN uom ON (item_inv_uom_id=uom_id) )
+               ON (poitem_itemsite_id=itemsite_id) 
+WHERE (poitem_pohead_id=<? value('pohead_id') ?>) 
+GROUP BY poitem_id, poitem_linenumber, poitem_status,
+         item_number, uom_name, poitem_vend_item_number, poitem_vend_uom,
+         poitem_unitprice, poitem_freight,poitem_qty_ordered, 
+         poitem_qty_received, poitem_qty_returned,itemsite_id, pohead_curr_id 
+ORDER BY poitem_linenumber;

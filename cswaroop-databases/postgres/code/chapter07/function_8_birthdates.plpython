@@ -1,0 +1,10 @@
+CREATE FUNCTION birthdates(OUT name text, OUT birthdate date)
+  RETURNS SETOF RECORD 
+AS $$
+    return (
+        {'name': 'bob', 'birthdate': '1980-10-10'},
+        {'name': 'mary', 'birthdate': '1983-02-17'},
+        ['jill', '2010-01-15'],
+    )
+$$ LANGUAGE plpythonu;
+

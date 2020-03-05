@@ -1,0 +1,32 @@
+-- Group: voucher
+-- Name:  miscDistr
+-- Notes: Voucher Misc. Distributions
+--        used by voucher, miscVoucher
+--        Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+SELECT vodist_id,
+       (formatGLAccount(accnt_id) || ' - ' || accnt_descrip) AS account,
+       vodist_notes,
+       vodist_amount, 'curr' AS vodist_amount_xtnumericrole 
+FROM vodist, accnt 
+WHERE ( (vodist_poitem_id=-1)
+  AND (vodist_accnt_id=accnt_id)
+  AND (vodist_tax_id=-1)
+  AND (vodist_vohead_id=<? value('vohead_id') ?>) ) 
+UNION ALL 
+SELECT vodist_id, (expcat_code || ' - ' || expcat_descrip) AS account,
+       vodist_notes,
+       vodist_amount, 'curr' AS vodist_amount_xtnumericrole 
+FROM vodist, expcat 
+WHERE ( (vodist_poitem_id=-1)
+  AND   (vodist_expcat_id=expcat_id)
+  AND   (vodist_vohead_id=<? value('vohead_id') ?>) ) 
+UNION ALL 
+SELECT vodist_id, (tax_code || ' - ' || tax_descrip) AS account,
+       vodist_notes,
+       vodist_amount, 'curr' AS vodist_amount_xtnumericrole 
+FROM vodist, tax 
+WHERE ( (vodist_poitem_id=-1)
+  AND   (vodist_tax_id=tax_id)
+  AND   (vodist_vohead_id=<? value('vohead_id') ?>) ) 
+ORDER BY account;

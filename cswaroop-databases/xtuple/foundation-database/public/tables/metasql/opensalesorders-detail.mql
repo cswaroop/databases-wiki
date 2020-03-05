@@ -1,0 +1,114 @@
+-- Group: opensalesorders
+-- Name:  detail
+-- Notes: 
+--        Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+
+SELECT DISTINCT
+       cohead.*,
+       COALESCE(cust_number, :error) AS cust_number,
+       COALESCE(saletype_descr, :error) AS saletype_descr,
+       getSoSchedDate(cohead_id) AS scheddate, 
+       cohead_status AS status,
+       CASE WHEN cohead_holdtype = 'N' THEN <? value("none") ?>
+            WHEN cohead_holdtype = 'C' THEN <? value("credit") ?>
+            WHEN cohead_holdtype = 'S' THEN <? value("ship") ?>
+            WHEN cohead_holdtype = 'P' THEN <? value("pack") ?>
+            WHEN cohead_holdtype = 'R' THEN <? value("return") ?>
+       END AS holdtype,
+<? foreach("char_id_text_list") ?>
+       charass_alias<? literal("char_id_text_list") ?>.charass_value AS char<? literal("char_id_text_list") ?>,
+<? endforeach ?>
+<? foreach("char_id_list_list") ?>
+       charass_alias<? literal("char_id_list_list") ?>.charass_value AS char<? literal("char_id_list_list") ?>,
+<? endforeach ?>
+<? foreach("char_id_date_list") ?>
+       charass_alias<? literal("char_id_date_list") ?>.charass_value::date AS char<? literal("char_id_date_list") ?>,
+<? endforeach ?>
+       firstline(cohead_ordercomments) AS notes,
+       calcSalesOrderAmt(cohead_id,'T', cohead_taxzone_id, cohead_orderdate, cohead_curr_id, cohead_freight, cohead_misc) AS ordertotal,
+       calcSalesOrderAmt(cohead_id,'M', cohead_taxzone_id, cohead_orderdate, cohead_curr_id, cohead_freight, cohead_misc) AS ordermargin,
+       calcSalesOrderAmt(cohead_id,'P', cohead_taxzone_id, cohead_orderdate, cohead_curr_id, cohead_freight, cohead_misc) AS ordermarginpercent,
+       'percent' AS ordermarginpercent_xtnumericrole,
+       'extprice' AS ordertotal_xtnumericrole,
+       'extprice' AS ordermargin_xtnumericrole
+FROM cohead
+     JOIN custinfo ON (cohead_cust_id=cust_id) 
+     JOIN custtype ON (cust_custtype_id=custtype_id)
+     LEFT OUTER JOIN saletype ON (cohead_saletype_id=saletype_id)
+<? foreach("char_id_text_list") ?>
+     LEFT OUTER JOIN charass charass_alias<? literal("char_id_text_list") ?> 
+          ON ((charass_alias<? literal("char_id_text_list") ?>.charass_target_type='SO') 
+         AND  (charass_alias<? literal("char_id_text_list") ?>.charass_target_id=cohead_id)
+         AND  (charass_alias<? literal("char_id_text_list") ?>.charass_char_id=<? value("char_id_text_list") ?>))
+     LEFT OUTER JOIN char char_alias<? literal("char_id_text_list") ?> 
+          ON (charass_alias<? literal("char_id_text_list") ?>.charass_char_id=char_alias<? literal("char_id_text_list") ?>.char_id)
+<? endforeach ?>
+<? foreach("char_id_list_list") ?>
+     LEFT OUTER JOIN charass charass_alias<? literal("char_id_list_list") ?> 
+          ON ((charass_alias<? literal("char_id_list_list") ?>.charass_target_type='SO') 
+         AND  (charass_alias<? literal("char_id_list_list") ?>.charass_target_id=cohead_id)
+         AND  (charass_alias<? literal("char_id_list_list") ?>.charass_char_id=<? value("char_id_list_list") ?>))
+     LEFT OUTER JOIN char char_alias<? literal("char_id_list_list") ?> 
+          ON (charass_alias<? literal("char_id_list_list") ?>.charass_char_id=char_alias<? literal("char_id_list_list") ?>.char_id)
+<? endforeach ?>
+<? foreach("char_id_date_list") ?>
+     LEFT OUTER JOIN charass charass_alias<? literal("char_id_date_list") ?> 
+          ON ((charass_alias<? literal("char_id_date_list") ?>.charass_target_type='SO') 
+         AND  (charass_alias<? literal("char_id_date_list") ?>.charass_target_id=cohead_id)
+         AND  (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=<? value("char_id_date_list") ?>))
+     LEFT OUTER JOIN char char_alias<? literal("char_id_date_list") ?> 
+          ON (charass_alias<? literal("char_id_date_list") ?>.charass_char_id=char_alias<? literal("char_id_date_list") ?>.char_id)
+<? endforeach ?>
+WHERE(
+     (cohead_warehous_id IS NULL OR cohead_warehous_id IN (SELECT warehous_id FROM site()))
+<? if exists("cust_id") ?>
+  AND (cust_id=<? value("cust_id") ?> )
+<? endif ?>
+<? if exists("custtype_id") ?>
+  AND (cust_custtype_id=<? value("custtype_id") ?>)
+<? endif ?>
+<? if exists("custtype_pattern") ?>
+  AND (custtype_code ~* <? value("custtype_pattern") ?>)
+<? endif ?>
+<? if exists("poNumber") ?>
+  AND  (cohead_custponumber~*<? value("poNumber") ?>)
+<? endif ?>
+<? if exists("startDate") ?>
+  AND (cohead_orderdate BETWEEN <? value("startDate") ?> AND <? value("endDate") ?>)
+<? endif ?>
+<? if not exists("showClosed") ?> 
+  AND (cohead_status='O')
+<? endif ?>
+<? if  exists("warehous_id") ?>
+  AND (warehous_id=<? value("warehous_id") ?>)
+<? endif ?>
+<? if  exists("salesrep_id") ?>
+  AND (cohead_salesrep_id=<? value("salesrep_id") ?>)
+<? endif ?>
+<? if  exists("saletype_id") ?>
+  AND (cohead_saletype_id=<? value("saletype_id") ?>)
+<? endif ?>
+<? if  exists("prj_id") ?>
+  AND (cohead_prj_id=<? value("prj_id") ?>)
+<? endif ?>
+<? if  exists("createdby") ?>
+  AND (cohead_creator=<? value("createdby") ?>)
+<? endif ?>
+<? if exists("holdtype") ?>
+  AND (CASE WHEN <? value("holdtype") ?> = 0 THEN cohead_holdtype = 'N'
+            WHEN <? value("holdtype") ?> = 1 THEN cohead_holdtype = 'C'
+            WHEN <? value("holdtype") ?> = 2 THEN cohead_holdtype = 'S'
+            WHEN <? value("holdtype") ?> = 3 THEN cohead_holdtype = 'P'
+            WHEN <? value("holdtype") ?> = 4 THEN cohead_holdtype = 'R' END)
+<? endif ?>
+  AND NOT EXISTS(SELECT 1
+                FROM coitem
+                JOIN itemsite on (coitem_itemsite_id=itemsite_id)
+                LEFT OUTER JOIN site() on (itemsite_warehous_id=warehous_id)
+               WHERE coitem_itemsite_id IS NOT NULL
+                AND warehous_id IS NULL
+                AND coitem_cohead_id=cohead_id)
+<? literal("charClause") ?>
+  ) 
+ORDER BY cohead_number;

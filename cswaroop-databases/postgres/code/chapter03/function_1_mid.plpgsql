@@ -1,0 +1,7 @@
+CREATE FUNCTION mid(varchar, integer, integer) RETURNS varchar
+AS $$
+BEGIN
+	RETURN substring($1,$2,$3);
+END;
+$$
+LANGUAGE plpgsql;

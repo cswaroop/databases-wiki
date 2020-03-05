@@ -1,0 +1,47 @@
+-- Group: unpostedCashReceipts
+-- Name: detail
+-- Notes: Used by arWorkBench, cashReceiptsEditList
+--        Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+--
+--        Modified Jan 2012 to incorporate Cash Receipts by Customer Group
+
+SELECT DISTINCT
+       cashrcpt_id,
+       cashrcpt_number,
+       CASE WHEN (cashrcpt_cust_id IS NOT NULL)
+            THEN cust_number
+            ELSE custgrp_name END as cust_number,
+       CASE WHEN (cashrcpt_cust_id IS NOT NULL)
+            THEN cust_name
+            ELSE custgrp_descrip END as cust_name,
+       cashrcpt_docnumber,
+       bankaccnt_name,
+       cashrcpt_distdate,
+       cashrcpt_amount,
+       currConcat(cashrcpt_curr_id) AS currabbr,
+       getFundsTypeName(cashrcpt_fundstype) AS cashrcpt_fundstype,
+       'curr' AS cashrcpt_amount_xtnumericrole
+FROM cashrcpt
+  LEFT JOIN custgrp ON (custgrp_id=cashrcpt_custgrp_id)
+  LEFT JOIN custgrpitem ON (custgrp_id=custgrpitem_custgrp_id)
+  JOIN bankaccnt ON (cashrcpt_bankaccnt_id=bankaccnt_id)
+  LEFT JOIN custinfo ON (cashrcpt_cust_id=cust_id)
+  LEFT JOIN custtype ON (cust_custtype_id=custtype_id)
+WHERE ( (NOT cashrcpt_posted)
+  AND   (NOT cashrcpt_void)
+<? if exists("cust_id") ?>
+  AND   (cashrcpt_cust_id=<? value("cust_id") ?>)
+<? endif ?>
+<? if exists("custgrp_id") ?>
+  AND  (custgrp_id=<? value("custgrp_id") ?>)
+<? endif ?>
+<? if exists("custtype_id") ?>
+  AND   (custtype_id=<? value("custtype_id") ?>)
+<? endif ?>
+<? if exists("custtype_pattern") ?>
+  AND   (custtype_code~<? value("custtype_pattern") ?>)
+<? endif ?>
+)
+ORDER BY cashrcpt_distdate;
+

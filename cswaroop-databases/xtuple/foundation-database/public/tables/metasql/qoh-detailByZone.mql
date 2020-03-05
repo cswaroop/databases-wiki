@@ -1,0 +1,22 @@
+-- Group: qoh
+-- Name:  detailByZone
+-- Notes: 
+--        Quantity on Hand By Warehouse Zone
+--        Copyright (c) 2015 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+SELECT itemsite_id, itemloc_id AS altid, item_number AS sortkey, warehous_code, item_number,
+       item_descrip1,
+       uom_name,
+       itemloc_qty AS qoh,
+       whsezone_name, 
+       location_descrip, location_aisle, location_rack, location_bin, item_id
+      FROM itemloc, itemsite, whsinfo, item, uom, location, whsezone
+      WHERE ((itemloc_itemsite_id=itemsite_id)
+         AND (itemsite_item_id=item_id)
+         AND (item_inv_uom_id=uom_id)
+         AND (itemsite_warehous_id=warehous_id)
+         AND (itemloc_location_id=location_id)
+         AND (location_whsezone_id=whsezone_id)
+         AND (whsezone_id=<? value("whsezone_id") ?>))
+ORDER BY
+         warehous_code, whsezone_name, item_number;

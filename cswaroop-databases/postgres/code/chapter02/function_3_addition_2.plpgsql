@@ -1,0 +1,8 @@
+CREATE OR REPLACE FUNCTION addition (integer, integer) RETURNS integer
+AS $$
+DECLARE retval integer;
+BEGIN
+	SELECT $1 + $2 INTO retval;
+	RETURN retval;
+END;
+$$ LANGUAGE plpgsql;

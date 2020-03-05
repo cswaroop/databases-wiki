@@ -1,0 +1,79 @@
+[
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "Filter",
+    "table": "xt.fltr",
+    "idSequenceName": "xt.fltr_fltr_id_seq",
+    "comment": "User Chart Map",
+    "privileges": {
+      "all": {
+        "create": true,
+        "read": true,
+        "update": true,
+        "delete": true
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "fltr_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "name",
+        "attr": {
+          "type": "String",
+          "column": "fltr_name"
+        }
+      },
+      {
+        "name": "type",
+        "attr": {
+          "type": "String",
+          "column": "fltr_type"
+        }
+      },
+      {
+        "name": "createdBy",
+        "attr": {
+          "type": "String",
+          "column": "fltr_createdby"
+        }
+      },
+      {
+        "name": "shared",
+        "attr": {
+          "type": "Boolean",
+          "column": "fltr_shared"
+        }
+      },
+      {
+        "name": "params",
+        "attr": {
+          "type": "String",
+          "column": "fltr_params"
+        }
+      },
+      {
+        "name": "kind",
+        "attr": {
+          "type": "String",
+          "column": "fltr_param_kind"
+        }
+      }
+    ],
+    "isSystem": true
+  }
+]

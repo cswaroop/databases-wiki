@@ -1,0 +1,27 @@
+-- Group: itemgroups
+-- Name:  detail
+-- Notes: used by itemGroups
+WITH RECURSIVE indentedgroups(id, name, descrip, catalog, depth, path, cycle) AS ( 
+                     SELECT itemgrp_id AS id, 
+                            itemgrp_name AS name, 
+                            itemgrp_descrip AS descrip, 
+                            itemgrp_catalog AS catalog, 
+                            0 AS depth, array[itemgrp_id] AS path, false AS cycle 
+                     FROM itemgrp
+                     <? if exists('showTopLevel') ?>
+                     WHERE itemgrp_id NOT IN (SELECT itemgrpitem_item_id FROM itemgrpitem WHERE itemgrpitem_item_id=itemgrp_id AND itemgrpitem_item_type = 'G')
+                     <? endif ?>
+                     UNION ALL 
+                     SELECT itemgrp_id AS id, 
+                            CASE itemgrpitem_item_type WHEN 'I' THEN item_number ELSE itemgrp_name END AS name, 
+                            CASE itemgrpitem_item_type WHEN 'I' THEN item_descrip1 ELSE itemgrp_descrip END AS descrip, 
+                            NULL AS catalog, 
+                            (depth+1) AS depth, (path || itemgrp_id) AS path, (itemgrp_id = any(path)) AS cycle 
+                     FROM indentedgroups JOIN itemgrpitem ON (itemgrpitem_itemgrp_id=id) 
+                       LEFT OUTER JOIN item ON (item_id=itemgrpitem_item_id AND itemgrpitem_item_type='I') 
+                       LEFT OUTER JOIN itemgrp ON (itemgrp_id=itemgrpitem_item_id AND itemgrpitem_item_type='G') 
+                     WHERE (NOT cycle)
+                     ) 
+SELECT id, name, descrip, catalog, depth AS xtindentrole, path, cycle 
+FROM indentedgroups 
+ORDER BY path, name;

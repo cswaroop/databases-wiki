@@ -1,0 +1,21 @@
+CREATE OR REPLACE FUNCTION fib(n integer) 
+  RETURNS decimal(1000,0) 
+AS $$
+  DECLARE counter integer := 0;
+  DECLARE a decimal(1000,0) := 0;
+  DECLARE b decimal(1000,0) := 1;
+BEGIN
+  IF (n < 1) THEN
+    RETURN 0;
+  END IF;
+
+  LOOP    
+    EXIT WHEN counter = n;
+    counter := counter + 1;
+    SELECT  b,a+b INTO a,b;
+  END LOOP;
+  
+  RETURN a;
+END;
+$$
+  LANGUAGE plpgsql;

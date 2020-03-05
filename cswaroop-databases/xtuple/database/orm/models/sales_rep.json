@@ -1,0 +1,85 @@
+[
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "SalesRep",
+    "table": "salesrep",
+    "isRest": true,
+    "idSequenceName": "salesrep_salesrep_id_seq",
+    "lockable": true,
+    "orderSequence": "CRMAccountNumber",
+    "comment": "Sales Rep Map",
+    "privileges": {
+      "all": {
+        "create": "MaintainSalesReps",
+        "read": "ViewSalesReps",
+        "update": "MaintainSalesReps",
+        "delete": "MaintainSalesReps"
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "salesrep_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "number",
+        "attr": {
+          "type": "String",
+          "column": "salesrep_number",
+          "isNaturalKey":true,
+          "required": true
+        }
+      },
+      {
+        "name": "isActive",
+        "attr": {
+          "type": "Boolean",
+          "column": "salesrep_active",
+          "required": true
+        }
+      },
+      {
+        "name": "name",
+        "attr": {
+          "type": "String",
+          "column": "salesrep_name"
+        }
+      },
+      {
+        "name": "commission",
+        "attr": {
+          "type": "Number",
+          "column": "salesrep_commission"
+        }
+      }
+    ],
+    "isSystem": true,
+    "extensions": [
+      {
+        "table": "crmacct",
+        "isChild": true,
+        "relations": [
+          {
+            "column": "crmacct_salesrep_id",
+            "inverse": "id"
+          }
+        ],
+        "properties": [
+          {
+            "name": "account",
+            "attr": {
+              "type": "String",
+              "column": "crmacct_number"
+            }
+          }
+        ],
+        "sequence": 0
+      }
+    ]
+  }
+]

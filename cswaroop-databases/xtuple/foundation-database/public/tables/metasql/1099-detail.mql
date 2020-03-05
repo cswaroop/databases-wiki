@@ -1,0 +1,159 @@
+-- Group: 1099
+-- Name:  detail
+-- Notes: This query totals checks and the accounts their corresponding voucher posts to and
+--        provides a summary figure based on the date range.
+-- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- See www.xtuple.com/CPAL for the full text of the software license.
+
+SELECT *, 
+       CASE WHEN (select accnt_1099_form_type
+                  from accnt
+                  where accnt_id=accntnum) = 'MISC' THEN checkamount ELSE 0 END as miscamt,
+       CASE WHEN (select accnt_1099_form_type
+                  from accnt
+                  where accnt_id=accntnum) = 'RENT' THEN checkamount ELSE 0 END as rentamt,
+       'currency' AS miscamt_xtnumericrole, 0 as miscamt_xttotalrole,
+       'currency' AS rentamt_xtnumericrole, 0 as rentamt_xttotalrole
+FROM
+(SELECT vend_id,
+        checkhead.checkhead_amount, 
+        case when checkhead_misc then checkhead_amount
+             else ROUND(vodist_amount*(checkitem_amount/vohead_amount),2)
+        END as checkamount,
+        checkhead_printed,
+        formataddr(vend_addr_id) as vaddr,
+        checkhead.checkhead_number, 
+        checkhead.checkhead_checkdate, 
+        checkhead.checkhead_recip_id, 
+        checkhead.checkhead_recip_type, 
+        checkitem.checkitem_vouchernumber, 
+        checkitem.checkitem_amount, 
+        checkhead.checkhead_misc, 
+        vohead.vohead_number, 
+        vendinfo.vend_name, taxreg_number,
+        checkhead.checkhead_ach_batch,
+        vend_number,
+        case when vend_1099 then 'YES' ELSE 'NO'
+        END as v1099,
+        'currency' AS checkamount_xtnumericrole, 0 as checkamount_xttotalrole,
+        vodist_costelem_id, vodist_accnt_id, vodist_expcat_id, checkhead_expcat_id,
+        Case when vodist_accnt_id > 0 then
+               vodist_accnt_id
+             when vodist_costelem_id > 0 then
+               Coalesce((select expcat_exp_accnt_id
+                         from expcat
+                         where expcat_id = (select poitem_expcat_id
+                                            from poitem
+                                            where poitem_id = vodist_poitem_id)),
+                        (select case when (Select itemsite_controlmethod
+                                           from itemsite
+                                           where itemsite_id = (select poitem_itemsite_id
+                                                                from poitem
+                                                                where poitem_id = vodist_poitem_id)) = 'N' then
+                                       costcat_exp_accnt_id
+                                     else costcat_asset_accnt_id
+                                END
+                         from costcat
+                         where costcat_id = (select itemsite_costcat_id
+                                             from itemsite
+                                             where itemsite_id = (Select poitem_itemsite_id
+                                                                  from poitem
+                                                                  where poitem_id = vodist_poitem_id))))
+             when vodist_expcat_id > 0 then
+               (select expcat_exp_accnt_id
+                from expcat
+                where expcat_id = vodist_expcat_id)
+             when checkhead_expcat_id > 0 then
+               (select expcat_exp_accnt_id
+                from expcat
+                where expcat_id = checkhead_expcat_id)
+             when checkhead_misc and checkhead_expcat_id is null then
+               (Select findapprepaidaccount(vend_id))
+        End AS accntnum,
+        (select accnt_name  || ' - ' || accnt_descrip
+         from accnt
+         where accnt_id = (Case when vodist_accnt_id > 0 then
+                                  vodist_accnt_id
+                                when vodist_costelem_id > 0 then
+                                  Coalesce((select expcat_exp_accnt_id
+                                            from expcat
+                                            where expcat_id = (select poitem_expcat_id
+                                                               from poitem
+                                                               where poitem_id = vodist_poitem_id)),
+                                           (select case when (Select itemsite_controlmethod
+                                                              from itemsite
+                                                              where itemsite_id = (select poitem_itemsite_id
+                                                                                   from poitem
+                                                                                   where poitem_id = vodist_poitem_id)) = 'N' then
+                                                          costcat_exp_accnt_id
+                                                        else
+                                                          costcat_asset_accnt_id
+                                                   END
+                                            from costcat
+                                            where costcat_id = (select itemsite_costcat_id
+                                                                from itemsite
+                                                                where itemsite_id = (Select poitem_itemsite_id
+                                                                                     from poitem
+                                                                                     where poitem_id = vodist_poitem_id))))
+                                when vodist_expcat_id > 0 then
+                                 (select expcat_exp_accnt_id
+                                  from expcat
+                                  where expcat_id = vodist_expcat_id)
+                                when checkhead_expcat_id > 0 then
+                                  (select expcat_exp_accnt_id
+                                   from expcat
+                                   where expcat_id = checkhead_expcat_id)
+                                when checkhead_misc and checkhead_expcat_id is null then
+                                  (Select findapprepaidaccount(vend_id))
+                            END)) as accountdescrip
+FROM checkhead left join checkitem on (checkhead_id = checkitem_checkhead_id)
+               left join vohead on (checkitem_vouchernumber = vohead_number)
+               left join vodist on (vodist_vohead_id = vohead_id),
+                         vendinfo left join taxreg ON (taxreg_rel_id = vend_id AND
+                                                       taxreg_taxauth_id = (select taxauth_id
+                                                                            from taxauth
+                                                                            where taxauth_code ~* '1099'))
+WHERE checkhead_void = false
+  AND checkhead_recip_id = vend_id
+  AND checkhead_recip_type = 'V' 
+ <? if exists("showall") ?> 
+  AND vend_1099 
+  AND (Case when vodist_accnt_id > 0 then
+              vodist_accnt_id
+            when vodist_costelem_id > 0 then
+              Coalesce((select expcat_exp_accnt_id
+                        from expcat
+                        where expcat_id = (select poitem_expcat_id
+                                           from poitem
+                                           where poitem_id = vodist_poitem_id)),
+                       (select case when (Select itemsite_controlmethod
+                                          from itemsite
+                                          where itemsite_id = (select poitem_itemsite_id
+                                                               from poitem
+                                                               where poitem_id = vodist_poitem_id)) = 'N' then
+                                      costcat_exp_accnt_id
+                                    else costcat_asset_accnt_id
+                               END
+                        from costcat
+                        where costcat_id = (select itemsite_costcat_id
+                                            from itemsite
+                                            where itemsite_id = (Select poitem_itemsite_id
+                                                                 from poitem
+                                                                 where poitem_id = vodist_poitem_id))))
+            when vodist_expcat_id > 0 then
+              (select expcat_exp_accnt_id
+               from expcat
+               where expcat_id = vodist_expcat_id)
+            when checkhead_expcat_id > 0 then
+              (select expcat_exp_accnt_id
+               from expcat
+               where expcat_id = checkhead_expcat_id)
+            when checkhead_misc and checkhead_expcat_id is null then
+              (Select findapprepaidaccount(vend_id))
+       End) in (select accnt_id from accnt where accnt_1099_form_type is not null)
+ <? endif ?>  
+  AND checkhead_checkdate BETWEEN <? value("fromdate") ?> AND <? value("todate") ?>) as chkamt
+
+ORDER BY vend_name, checkhead_checkdate  ;
+
+

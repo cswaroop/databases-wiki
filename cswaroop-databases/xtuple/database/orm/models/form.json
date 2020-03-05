@@ -1,0 +1,150 @@
+[
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "Form",
+    "table": "form",
+    "idSequenceName": "form_form_id_seq",
+    "comment": "Form Setup Map",
+    "privileges": {
+      "all": {
+        "create": true,
+        "read": true,
+        "update": true,
+        "delete": true
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "form_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "name",
+        "attr": {
+          "type": "String",
+          "column": "form_name"
+        }
+      },
+      {
+        "name": "description",
+        "attr": {
+          "type": "String",
+          "column": "form_descrip"
+        }
+      },
+      {
+        "name": "reportName",
+        "attr": {
+          "type": "String",
+          "column": "form_report_name",
+          "required": true
+        }
+      },
+      {
+        "name": "key",
+        "attr": {
+          "type": "String",
+          "column": "form_key"
+        }
+      }
+    ],
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "LabelForm",
+    "table": "labelform",
+    "isRest": true,
+    "idSequenceName": "labelform_labelform_id_seq",
+    "lockable": true,
+    "comment": "Label Form Setup Map",
+    "privileges": {
+      "all": {
+        "create": "MaintainForms",
+        "read": true,
+        "update": "MaintainForms",
+        "delete": "MaintainForms"
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "labelform_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "name",
+        "attr": {
+          "type": "String",
+          "column": "labelform_name",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "reportName",
+        "attr": {
+          "type": "String",
+          "column": "labelform_report_name"
+        }
+      },
+      {
+        "name": "perPage",
+        "attr": {
+          "type": "Number",
+          "column": "labelform_perpage"
+        }
+      }
+    ],
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "ShipForm",
+    "table": "shipform",
+    "idSequenceName": "shipform_shipform_id_seq",
+    "comment": "Ship Form Setup Map",
+    "privileges": {
+      "all": {
+        "create": true,
+        "read": true,
+        "update": true,
+        "delete": true
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "shipform_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "name",
+        "attr": {
+          "type": "String",
+          "column": "shipform_name"
+        }
+      },
+      {
+        "name": "reportName",
+        "attr": {
+          "type": "String",
+          "column": "shipform_report_name"
+        }
+      }
+    ],
+    "isSystem": true
+  }
+]

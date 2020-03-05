@@ -1,0 +1,19 @@
+-- Group: permissions
+-- Name:  role
+-- Notes: used by dspUserPrivileges
+--        User Permissions (Role permissions)
+--        Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+
+SELECT usrgrp_username as role_username,grp_name, grp_descrip  
+FROM usrgrp
+JOIN usr ON (usr_username=usrgrp_username)
+JOIN grp ON grp_id=usrgrp_grp_id
+WHERE (usr_active=true)
+<? if exists("username")?>
+  AND usrgrp_username=<? value("username")?>
+<? endif ?>
+<? if exists("role") ?>
+ AND (grp_id=<? value("role") ?>)
+<? endif ?>
+ORDER BY usrgrp_username,grp_name

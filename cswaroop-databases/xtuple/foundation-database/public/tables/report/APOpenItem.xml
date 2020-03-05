@@ -1,0 +1,755 @@
+<!DOCTYPE openRPTDef>
+<report>
+ <title>APOpenItem</title>
+ <name>APOpenItem</name>
+ <description>A report showing details of a single AP Open Item</description>
+ <parameter name="aropen_id" active="true" default="-1" type="integer" listtype="static">
+  <description></description>
+ </parameter>
+ <parameter name="docTypeID" active="false" default="-1" type="integer" listtype="static">
+  <description></description>
+ </parameter>
+ <parameter name="docTypeRC" active="true" default="-1" type="integer" listtype="static">
+  <description></description>
+ </parameter>
+ <grid>
+  <snap/>
+  <show/>
+  <x>0.05</x>
+  <y>0.05</y>
+ </grid>
+ <size>Letter</size>
+ <portrait/>
+ <topmargin>50</topmargin>
+ <bottommargin>50</bottommargin>
+ <rightmargin>50</rightmargin>
+ <leftmargin>50</leftmargin>
+ <querysource>
+  <name>head</name>
+  <sql>SELECT apopen_vend_id, apopen_docdate, apopen_duedate, 
+apopen_doctype,
+CASE WHEN (apopen_doctype = 'V') THEN 'Voucher'
+     WHEN (apopen_doctype = 'C') THEN 'Misc. Credit Memo'
+     WHEN (apopen_doctype = 'D' ) THEN 'Misc. Debit Memo'
+     END AS doc_name, 
+apopen_docnumber, 
+apopen_ponumber, apopen_journalnumber, 
+apopen_amount, apopen_amount, 
+apopen_paid, 
+(apopen_amount - apopen_paid) AS f_balance, 
+apopen_terms_id, 
+apopen_notes, 
+apopen_accnt_id, apopen_curr_id, 
+vend_number, vend_name, terms_code
+FROM apopen 
+JOIN vendinfo ON(vend_id = apopen_vend_id)
+LEFT OUTER JOIN terms ON(terms_id = apopen_terms_id)
+WHERE (apopen_id=&lt;? value("apopen_id") ?>)</sql>
+ </querysource>
+ <querysource>
+  <name>applications</name>
+  <sql>&lt;? if exists("docTypeID") ?>
+SELECT apapply_id, apapply_source_apopen_id,
+     CASE WHEN (apapply_source_doctype = 'C') THEN &lt;? value("creditMemo") ?>
+       WHEN (apapply_source_doctype = 'K') THEN &lt;? value("cashdeposit") ?>
+     END AS doctype,
+     apapply_source_docnumber AS docnumber,
+apapply_postdate, apapply_amount, 
+currConcat(apapply_curr_id) AS currabbr, 
+currToBase(apapply_curr_id, apapply_amount, apapply_postdate) AS baseapplied, 
+'curr' AS apapply_applied_xtnumericrole, 
+'curr' AS baseapplied_xtnumericrole 
+FROM apapply 
+WHERE (apapply_target_apopen_id=&lt;? value("apopen_id") ?> ) 
+ORDER BY apapply_postdate
+
+&lt;? elseif exists("docTypeCM") ?>
+
+SELECT apapply_id, apapply_target_apopen_id, 
+     CASE WHEN (apapply_target_doctype = 'V') THEN '&lt;? value("voucher") ?>
+      WHEN (apapply_target_doctype = 'D') THEN &lt;? value("debitMemo") ?>
+      WHEN (apapply_target_doctype = 'K') THEN &lt;? value("apcheck") ?>
+      ELSE &lt;? value("other") ?>
+     END AS doctype, 
+apapply_target_docnumber AS docnumber, 
+apapply_postdate, apapply_amount, 
+currConcat(apapply_curr_id) AS currabbr, 
+currToBase(apapply_curr_id, apapply_amount, apapply_postdate) AS baseapplied, 
+'curr' AS apapply_applied_xtnumericrole, 
+'curr' AS baseapplied_xtnumericrole 
+FROM apapply 
+WHERE (apapply_source_apopen_id=&lt;? value("apopen_id") ?> )
+ORDER BY apapply_postdate
+
+&lt;? endif ?></sql>
+ </querysource>
+ <rpthead>
+  <height>445</height>
+  <field>
+   <rect>
+    <x>530</x>
+    <y>160</y>
+    <width>196</width>
+    <height>25</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <left/>
+   <top/>
+   <data>
+    <query>head</query>
+    <column>apopen_paid</column>
+   </data>
+  </field>
+  <field>
+   <rect>
+    <x>530</x>
+    <y>185</y>
+    <width>195</width>
+    <height>25</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <left/>
+   <top/>
+   <data>
+    <query>head</query>
+    <column>f_balance</column>
+   </data>
+  </field>
+  <field>
+   <rect>
+    <x>140</x>
+    <y>70</y>
+    <width>201</width>
+    <height>25</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <left/>
+   <top/>
+   <data>
+    <query>head</query>
+    <column>apopen_docdate</column>
+   </data>
+  </field>
+  <label>
+   <rect>
+    <x>5</x>
+    <y>45</y>
+    <width>126</width>
+    <height>18.3</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <right/>
+   <top/>
+   <string>Vendor:</string>
+  </label>
+  <label>
+   <rect>
+    <x>-10</x>
+    <y>185</y>
+    <width>142</width>
+    <height>25</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <right/>
+   <top/>
+   <string>PO Number:</string>
+  </label>
+  <label>
+   <rect>
+    <x>30</x>
+    <y>90</y>
+    <width>100</width>
+    <height>25</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <right/>
+   <top/>
+   <string>Due Date:</string>
+  </label>
+  <label>
+   <rect>
+    <x>460</x>
+    <y>70</y>
+    <width>66.5</width>
+    <height>18.4</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <right/>
+   <top/>
+   <string>Terms:</string>
+  </label>
+  <field>
+   <rect>
+    <x>530</x>
+    <y>135</y>
+    <width>216</width>
+    <height>25</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <left/>
+   <top/>
+   <data>
+    <query>head</query>
+    <column>apopen_amount</column>
+   </data>
+  </field>
+  <field>
+   <rect>
+    <x>535</x>
+    <y>70</y>
+    <width>210</width>
+    <height>25</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <left/>
+   <top/>
+   <data>
+    <query>head</query>
+    <column>terms_code</column>
+   </data>
+  </field>
+  <label>
+   <rect>
+    <x>440</x>
+    <y>185</y>
+    <width>82</width>
+    <height>18.2</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <right/>
+   <top/>
+   <string>Balance:</string>
+  </label>
+  <label>
+   <rect>
+    <x>-20</x>
+    <y>160</y>
+    <width>152</width>
+    <height>25</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <right/>
+   <top/>
+   <string>Document Number:</string>
+  </label>
+  <field>
+   <rect>
+    <x>140</x>
+    <y>160</y>
+    <width>210</width>
+    <height>25</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <left/>
+   <top/>
+   <data>
+    <query>head</query>
+    <column>apopen_docnumber</column>
+   </data>
+  </field>
+  <field>
+   <rect>
+    <x>140</x>
+    <y>90</y>
+    <width>216</width>
+    <height>25</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <left/>
+   <top/>
+   <data>
+    <query>head</query>
+    <column>apopen_duedate</column>
+   </data>
+  </field>
+  <field>
+   <rect>
+    <x>140</x>
+    <y>45</y>
+    <width>432</width>
+    <height>25</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <left/>
+   <top/>
+   <data>
+    <query>head</query>
+    <column>vend_name</column>
+   </data>
+  </field>
+  <label>
+   <rect>
+    <x>-15</x>
+    <y>70</y>
+    <width>143.191</width>
+    <height>25</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <right/>
+   <top/>
+   <string>Document Date:</string>
+  </label>
+  <field>
+   <rect>
+    <x>140</x>
+    <y>135</y>
+    <width>175</width>
+    <height>25</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <left/>
+   <top/>
+   <data>
+    <query>head</query>
+    <column>apopen_doctype</column>
+   </data>
+  </field>
+  <field>
+   <rect>
+    <x>90</x>
+    <y>270</y>
+    <width>624</width>
+    <height>128</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <wordwrap/>
+   <left/>
+   <top/>
+   <data>
+    <query>head</query>
+    <column>apopen_notes</column>
+   </data>
+  </field>
+  <field>
+   <rect>
+    <x>140</x>
+    <y>210</y>
+    <width>177</width>
+    <height>25</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <left/>
+   <top/>
+   <data>
+    <query>head</query>
+    <column>apopen_journalnumber</column>
+   </data>
+  </field>
+  <label>
+   <rect>
+    <x>0</x>
+    <y>135</y>
+    <width>133</width>
+    <height>25</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <right/>
+   <top/>
+   <string>Document Type:</string>
+  </label>
+  <label>
+   <rect>
+    <x>435</x>
+    <y>135</y>
+    <width>86.4</width>
+    <height>17.2</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <right/>
+   <top/>
+   <string>Amount:</string>
+  </label>
+  <label>
+   <rect>
+    <x>470</x>
+    <y>160</y>
+    <width>52.6</width>
+    <height>19.9</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <right/>
+   <top/>
+   <string>Paid:</string>
+  </label>
+  <field>
+   <rect>
+    <x>140</x>
+    <y>185</y>
+    <width>176</width>
+    <height>25</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <left/>
+   <top/>
+   <data>
+    <query>head</query>
+    <column>apopen_ponumber</column>
+   </data>
+  </field>
+  <label>
+   <rect>
+    <x>20</x>
+    <y>265</y>
+    <width>100</width>
+    <height>25</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>bold</weight>
+   </font>
+   <left/>
+   <top/>
+   <string>Notes:</string>
+  </label>
+  <label>
+   <rect>
+    <x>-35</x>
+    <y>210</y>
+    <width>166</width>
+    <height>25</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>10</size>
+    <weight>normal</weight>
+   </font>
+   <right/>
+   <top/>
+   <string>Journal Number:</string>
+  </label>
+  <label>
+   <rect>
+    <x>10</x>
+    <y>415</y>
+    <width>100</width>
+    <height>20</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>12</size>
+    <weight>normal</weight>
+   </font>
+   <left/>
+   <top/>
+   <string>Doc Type</string>
+  </label>
+  <label>
+   <rect>
+    <x>125</x>
+    <y>415</y>
+    <width>110</width>
+    <height>20</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>12</size>
+    <weight>normal</weight>
+   </font>
+   <left/>
+   <top/>
+   <string>Doc Number</string>
+  </label>
+  <label>
+   <rect>
+    <x>240</x>
+    <y>415</y>
+    <width>100</width>
+    <height>21</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>12</size>
+    <weight>normal</weight>
+   </font>
+   <left/>
+   <top/>
+   <string>Apply Date</string>
+  </label>
+  <label>
+   <rect>
+    <x>350</x>
+    <y>415</y>
+    <width>100</width>
+    <height>20</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>12</size>
+    <weight>normal</weight>
+   </font>
+   <left/>
+   <top/>
+   <string>Amount</string>
+  </label>
+  <label>
+   <rect>
+    <x>470</x>
+    <y>415</y>
+    <width>100</width>
+    <height>20</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>12</size>
+    <weight>normal</weight>
+   </font>
+   <left/>
+   <top/>
+   <string>Currency</string>
+  </label>
+  <label>
+   <rect>
+    <x>610</x>
+    <y>415</y>
+    <width>120</width>
+    <height>19</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>12</size>
+    <weight>normal</weight>
+   </font>
+   <left/>
+   <top/>
+   <string>Base Amount</string>
+  </label>
+  <line>
+   <xstart>4</xstart>
+   <ystart>434</ystart>
+   <xend>737</xend>
+   <yend>434</yend>
+   <weight>2</weight>
+  </line>
+  <field>
+   <rect>
+    <x>30</x>
+    <y>10</y>
+    <width>698.682</width>
+    <height>37.1</height>
+   </rect>
+   <font>
+    <face>Sans Serif</face>
+    <size>20</size>
+    <weight>bold</weight>
+   </font>
+   <right/>
+   <top/>
+   <data>
+    <query>head</query>
+    <column>doc_name</column>
+   </data>
+  </field>
+ </rpthead>
+ <section>
+  <name>applications_detail</name>
+  <detail>
+   <key>
+    <query>applications</query>
+   </key>
+   <height>23</height>
+   <field>
+    <rect>
+     <x>10</x>
+     <y>0</y>
+     <width>100</width>
+     <height>25</height>
+    </rect>
+    <font>
+     <face>Sans Serif</face>
+     <size>12</size>
+     <weight>normal</weight>
+    </font>
+    <left/>
+    <top/>
+    <data>
+     <query>applications</query>
+     <column>doctype</column>
+    </data>
+   </field>
+   <field>
+    <rect>
+     <x>125</x>
+     <y>0</y>
+     <width>100</width>
+     <height>25</height>
+    </rect>
+    <font>
+     <face>Sans Serif</face>
+     <size>12</size>
+     <weight>normal</weight>
+    </font>
+    <left/>
+    <top/>
+    <data>
+     <query>applications</query>
+     <column>docnumber</column>
+    </data>
+   </field>
+   <field>
+    <rect>
+     <x>240</x>
+     <y>0</y>
+     <width>100</width>
+     <height>25</height>
+    </rect>
+    <font>
+     <face>Sans Serif</face>
+     <size>12</size>
+     <weight>normal</weight>
+    </font>
+    <left/>
+    <top/>
+    <data>
+     <query>applications</query>
+     <column>apapply_postdate</column>
+    </data>
+   </field>
+   <field>
+    <rect>
+     <x>350</x>
+     <y>0</y>
+     <width>100</width>
+     <height>25</height>
+    </rect>
+    <font>
+     <face>Sans Serif</face>
+     <size>12</size>
+     <weight>normal</weight>
+    </font>
+    <left/>
+    <top/>
+    <data>
+     <query>applications</query>
+     <column>apapply_applied</column>
+    </data>
+   </field>
+   <field>
+    <rect>
+     <x>475</x>
+     <y>0</y>
+     <width>100</width>
+     <height>25</height>
+    </rect>
+    <font>
+     <face>Sans Serif</face>
+     <size>12</size>
+     <weight>normal</weight>
+    </font>
+    <left/>
+    <top/>
+    <data>
+     <query>applications</query>
+     <column>currabbr</column>
+    </data>
+   </field>
+   <field>
+    <rect>
+     <x>610</x>
+     <y>0</y>
+     <width>100</width>
+     <height>25</height>
+    </rect>
+    <font>
+     <face>Sans Serif</face>
+     <size>12</size>
+     <weight>normal</weight>
+    </font>
+    <left/>
+    <top/>
+    <data>
+     <query>applications</query>
+     <column>baseapplied</column>
+    </data>
+   </field>
+  </detail>
+ </section>
+</report>

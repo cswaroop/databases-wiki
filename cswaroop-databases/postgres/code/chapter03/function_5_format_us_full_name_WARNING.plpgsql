@@ -1,0 +1,97 @@
+/*
+
+
+NB!! THE CODE IN CHAPTER DOES NOT WORK !!
+
+USE CODE AFTER COMMENT END and explain functions CONCAT_WS() and NULLIF()
+
+explain why " nullif(trim(prefix), '') || '.' " works
+
+check! http://www.postgresql.org/docs/current/static/functions-conditional.html
+
+CREATE OR REPLACE FUNCTION format_us_full_name(
+                             prefix text, firstname text, 
+                             mi text, lastname text, 
+                             suffix text)
+  RETURNS text AS
+$$
+DECLARE
+        fname_mi text;
+        fmi_lname text;
+        prefix_fmil text;
+        pfmil_suffix text;
+BEGIN
+        fname_mi := CONCAT_WS(' ',
+                                  IF(trim(firstname) ='',NULL,firstname), 
+                                  IF(trim(mi) = '', NULL, mi || '.')
+                           );
+        fmi_lname := CONCAT_WS(' ',
+                                   IF(fname_mi = '',NULL, fname_mi),
+                                   IF(trim(lastname) =  '', NULL, lastname)
+                            );
+        prefix_fmil := CONCAT_WS('. ',
+                                      IF(trim(prefix) = '', NULL, prefix), 
+                                      IF(fmi_lname = '', NULL, fmi_lname)
+                            );
+        pfmil_suffix := CONCAT_WS(', ',
+                                       IF (prefix_fmil = '', NULL, prefix_fmil), 
+                                       IF (trim(suffix) = '', NULL, suffix || '.')
+                             );
+        RETURN pfmil_suffix;
+END;
+$$
+  LANGUAGE plpgsql;
+*/
+
+CREATE OR REPLACE FUNCTION format_us_full_name(
+                             prefix text, firstname text, 
+                             mi text, lastname text, 
+                             suffix text)
+  RETURNS text AS
+$$
+DECLARE
+        result text;
+BEGIN
+        
+        result = CONCAT_WS(' ',
+                           nullif(trim(prefix), '') || '.',
+                           nullif(trim(firstname), ''),
+                           nullif(trim(mi), '') || '.',
+                           nullif(trim(lastname),'')
+                           );
+        IF (trim(suffix) <> '') THEN
+            result = result || ', ' || trim(suffix) || '.';
+        END IF;
+        RETURN result;
+END;
+$$
+  LANGUAGE plpgsql;
+
+-- this can also be written as
+
+CREATE OR REPLACE FUNCTION format_us_full_name(
+                             prefix text, firstname text, 
+                             mi text, lastname text, 
+                             suffix text)
+  RETURNS text AS
+$$
+DECLARE
+        result text;
+BEGIN
+        
+        result = CONCAT_WS(' ',
+                           nullif(trim(prefix), '') || '.',
+                           nullif(trim(firstname), ''),
+                           nullif(trim(mi), '') || '.',
+                           nullif(trim(lastname),'')
+                           );
+        result = CONCAT_WS(', ',
+                           result,
+                           nullif(trim(suffix),'') || '.'
+                           );
+        RETURN result;
+END;
+$$
+  LANGUAGE plpgsql;
+
+

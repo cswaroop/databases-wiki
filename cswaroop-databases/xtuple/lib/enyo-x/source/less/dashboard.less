@@ -1,0 +1,118 @@
+
+/*
+  Styles relating to the dashboard
+*/
+
+/*
+  Variables for widths/colors
+*/
+@tile-width: 500px;
+@tile-height: 250px;
+@picker-label: 100px;
+@bottom-border: #444;
+@icon-height: 32px;
+@title-height: 48px;
+
+.dashboard {
+  background-color: @gray;
+
+  .charts-panels {
+    overflow-y: auto;
+  }
+
+  /*
+    These styles will only be used
+    if the chart is in a dashboard
+  */
+  .selectable-chart {
+    width: @tile-width;
+    height: @tile-height;
+
+    .chart-title-bar {
+      width: @tile-width;
+    }
+  }
+
+  .nvtooltip {
+    color: black;
+  }
+}
+
+.selectable-chart {
+  margin: 10px;
+  color: @slate-blue;
+  overflow: hidden;
+  
+  .xv-list-item {
+    border-bottom: 1px solid grey;
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+    .long {
+      padding-left: 7px;
+      width: 250px;
+    }
+  }
+  
+  .onyx-popup {
+    margin-top:40px;
+    margin-left:200px;
+  }
+
+  .chart-title-bar {
+    height: @title-height;
+    background-color: @lightest-gray;
+    text-transform: none;
+    .border-top-radius(10px);
+
+    .chart-title {
+      padding-top: 8px;
+      color: @black;
+      text-align: center;
+      /*font-size: 2em;*/
+      font-weight: normal;
+      font-family: Helvetica;
+    }
+    
+    .chart-sub-title {
+      /*padding-top: 8px;*/
+      color: @blue;
+      text-align: center;
+      font-size: small;
+      font-weight: normal;
+      font-family: Helvetica;
+    }
+
+    .remove-icon {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+    
+    .icon-filter {
+       color: @black;
+       position: absolute;
+       top: 0;
+       right: 35px;
+    }
+  }
+
+  .chart-bottom {
+    background-color: @white;
+    border: 1px solid @bottom-border;
+    border-top: none;
+    .border-bottom-radius(10px);
+
+    .xv-picker-label {
+      width: @picker-label;
+      color: @black;
+    }
+    .onyx-button {
+      width: 130px;
+      padding: 10px 10px;
+    }
+  }
+  
+  .chart-filterDrawer {
+    top: 0px;
+  }
+  
+}

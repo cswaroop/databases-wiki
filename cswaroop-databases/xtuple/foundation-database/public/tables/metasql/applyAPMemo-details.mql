@@ -1,0 +1,38 @@
+-- Group: applyAPMemo
+-- Name:  details
+-- Notes: Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+SELECT apopen_id,
+       CASE WHEN (apopen_doctype='V') THEN <? value('voucher') ?>
+            WHEN (apopen_doctype='D') THEN <? value('debitMemo') ?>
+             END AS doctype,
+       apopen_docnumber,
+       apopen_docdate, apopen_duedate,
+       (apopen_amount - apopen_paid - COALESCE(selected,0.0) -
+            COALESCE(prepared,0.0)) AS openamount,
+	currConcat(apopen_curr_id) AS opencurrabbr, 
+        apcreditapply_amount, 
+	currConcat(apcreditapply_curr_id) AS appliedcurrabbr,
+        'curr' AS openamount_xtnumericrole,
+        'curr' AS apcreditapply_amount_xtnumericrole
+FROM apopen 
+LEFT OUTER JOIN apcreditapply 
+   ON ( (apcreditapply_source_apopen_id=<? value('parentApopenid') ?>) AND (apcreditapply_target_apopen_id=apopen_id) ) 
+LEFT OUTER JOIN (SELECT apopen_id AS selected_apopen_id,
+     SUM(currToCurr(apselect_curr_id, apopen_curr_id, apselect_amount + apselect_discount, apselect_date)) AS selected
+     FROM apselect JOIN apopen ON (apselect_apopen_id=apopen_id)
+     GROUP BY apopen_id) AS sub1
+            ON (apopen_id=selected_apopen_id)
+LEFT OUTER JOIN (SELECT apopen_id AS prepared_apopen_id,
+     SUM(checkitem_amount + checkitem_discount) AS prepared
+     FROM checkhead JOIN checkitem ON (checkitem_checkhead_id=checkhead_id)
+     JOIN apopen ON (checkitem_apopen_id=apopen_id)
+     WHERE ((NOT checkhead_posted)
+      AND  (NOT checkhead_void))
+      GROUP BY apopen_id) AS sub2
+            ON (prepared_apopen_id=apopen_id)
+ WHERE ( (apopen_doctype IN ('V', 'D'))
+   AND   (apopen_open)
+   AND   ((apopen_amount - apopen_paid - COALESCE(selected,0.0) - COALESCE(prepared,0.0)) > 0.0)
+   AND   (apopen_vend_id=<? value('vend_id') ?>) ) 
+ORDER BY apopen_duedate, apopen_docnumber;

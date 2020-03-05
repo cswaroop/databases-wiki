@@ -1,0 +1,11 @@
+CREATE FUNCTION fact(x int) RETURNS int
+AS $$
+    global x
+    f = 1
+    while (x > 0):
+        f = f * x
+        x = x - 1
+        plpy.notice('f:%d, x:%d' % (f, x))
+    return f
+$$ LANGUAGE plpythonu;
+

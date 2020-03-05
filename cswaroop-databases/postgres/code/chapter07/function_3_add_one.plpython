@@ -1,0 +1,5 @@
+CREATE FUNCTION add_one(i int) 
+  RETURNS int AS $$
+return i + 1;
+$$ LANGUAGE plpythonu;
+

@@ -1,0 +1,55 @@
+-- Group: partiallyShippedOrders
+-- Name: detail
+-- Notes: used by dspPartiallyShippedOrders
+-- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+-- See www.xtuple.com/CPAL for the full text of the software license.
+
+SELECT CASE WHEN (soHoldType(cohead_id) IN ('P', 'C', 'R')) THEN -1
+            ELSE cohead_id
+       END AS _coheadid, cohead_id,
+       soHoldType(cohead_id) AS holdtype, cohead_number, cust_name, saletype_descr,
+       CASE soHoldType(cohead_id) WHEN 'N' THEN <? value("none") ?>
+                                  WHEN 'C' THEN <? value("credit") ?>
+                                  WHEN 'S' THEN <? value("ship") ?>
+                                  WHEN 'P' THEN <? value("pack") ?>
+                                  WHEN 'R' THEN <? value("return") ?>
+                                  ELSE <? value("other") ?>
+       END AS f_holdtype,
+       cohead_orderdate,
+       (MIN(coitem_scheddate)) AS minscheddate,
+       cohead_packdate,
+       SUM( (noNeg(coitem_qtyord - coitem_qtyshipped + coitem_qtyreturned) * coitem_qty_invuomratio) *
+                  (coitem_price / coitem_price_invuomratio) ) AS extprice,
+       currConcat(cohead_curr_id) AS currAbbr,
+       SUM(currToBase(cohead_curr_id,
+          (noNeg(coitem_qtyord - coitem_qtyshipped + coitem_qtyreturned) * coitem_qty_invuomratio) *
+          (coitem_price / coitem_price_invuomratio),
+          CURRENT_DATE)) AS extprice_base,
+       'curr' AS extprice_xtnumericrole,
+       'curr' AS extprice_base_xtnumericrole,
+       <? if exists("singlecurrency") ?>
+         0 AS extprice_xttotalrole 
+       <? else ?>
+         0 AS extprice_base_xttotalrole 
+       <? endif ?>
+FROM cohead
+  LEFT OUTER JOIN saletype ON (saletype_id=cohead_saletype_id)
+  JOIN custinfo ON (cust_id=cohead_cust_id)
+  JOIN coitem ON (coitem_cohead_id=cohead_id)
+  JOIN itemsite ON (itemsite_id=coitem_itemsite_id)
+  JOIN item ON (item_id=itemsite_item_id)
+WHERE ( (coitem_status='O')
+    AND (cohead_id IN ( SELECT DISTINCT coitem_cohead_id
+                        FROM coitem
+                        WHERE (coitem_qtyshipped > 0) ))
+    AND (coitem_qtyshipped < coitem_qtyord)
+    AND (coitem_scheddate BETWEEN <? value("startDate") ?>
+                              AND <? value("endDate") ?>)
+    <? if exists("warehous_id") ?>
+      AND (itemsite_warehous_id=<? value("warehous_id") ?>)
+    <? endif ?>
+      ) 
+GROUP BY cohead_id, saletype_descr, cohead_number, cust_name, 
+         cohead_orderdate, cohead_packdate,
+         cohead_curr_id 
+ORDER BY minscheddate, cohead_number;

@@ -1,0 +1,14 @@
+CREATE OR REPLACE FUNCTION cancel_with_message()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION '%', TG_ARGV[0];
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER no_updates_on_friday_afternoon
+BEFORE INSERT OR UPDATE OR DELETE OR TRUNCATE ON new_tasks
+FOR EACH STATEMENT
+WHEN (CURRENT_TIME > '12:00' AND extract(DOW from CURRENT_TIMESTAMP) = 5)
+EXECUTE PROCEDURE cancel_with_message(new_tasks);
+

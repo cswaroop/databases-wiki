@@ -1,0 +1,27 @@
+CREATE OR REPLACE FUNCTION running_queries(rows int, qlen int)
+  RETURNS SETOF running_queries AS
+$$
+BEGIN
+   RETURN QUERY SELECT
+      runtime,
+      pid,
+      usename,
+      waiting,
+     (CASE WHEN ( usename= session_user )
+        OR (select usesuper
+              from pg_user
+             where usename = session_user)
+      THEN
+        substring(query,1,qlen)
+      ELSE
+        substring(ltrim(query), 1, 6) || ' ***'
+      END) as query,
+      appname   
+    FROM running_queries
+   ORDER BY 1 DESC
+   LIMIT rows;
+END;
+$$
+LANGUAGE plpgsql
+SECURITY DEFINER;
+

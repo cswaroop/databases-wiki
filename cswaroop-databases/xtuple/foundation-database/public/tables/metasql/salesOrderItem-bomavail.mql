@@ -1,0 +1,54 @@
+-- Group: salesOrderItem
+-- Name: bomavail
+-- Notes: used by salesOrderItem
+--        Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+
+SELECT itemsiteid,
+       reorderlevel,
+       bomitem_seqnumber AS seqnumber,
+       item_number,
+       item_descrip,
+       uom_name,
+       pendalloc,
+       ordered,
+       availableqoh,
+       (totalalloc + pendalloc) AS totalalloc,
+       (availableqoh + ordered - (totalalloc + pendalloc)) AS totalavail,
+       'qty' AS pendalloc_xtnumericrole,
+       'qty' AS ordered_xtnumericrole,
+       'qty' AS availableqoh_xtnumericrole,
+       'qty' AS totalalloc_xtnumericrole,
+       'qty' AS totalavail_xtnumericrole,
+       CASE WHEN availableqoh < pendalloc THEN 'error'
+            WHEN (availableqoh + ordered - (totalalloc + pendalloc)) < 0  THEN 'error'
+            WHEN (availableqoh + ordered - (totalalloc + pendalloc)) < reorderlevel THEN 'warning'
+       END AS qtforegroundrole
+FROM ( SELECT cs.itemsite_id AS itemsiteid,
+              CASE WHEN(cs.itemsite_useparams) THEN cs.itemsite_reorderlevel ELSE 0.0 END AS reorderlevel,
+              bomitem_seqnumber, item_number,
+              (item_descrip1 || ' ' || item_descrip2) AS item_descrip, uom_name,
+              itemuomtouom(bomitem_item_id,
+                           bomitem_uom_id,
+                           NULL,
+                           (bomitem_qtyfxd + bomitem_qtyper * <? value("qty") ?>) * (1 + bomitem_scrap)) AS pendalloc,
+              (qtyAllocated(cs.itemsite_id, DATE(<? value("date") ?>) + <? value("offset") ?>) - 
+               itemuomtouom(bomitem_item_id,
+                            bomitem_uom_id,
+                            NULL,
+                            (bomitem_qtyfxd + bomitem_qtyper * <? value("origQtyOrd") ?>) * (1 + bomitem_scrap))) AS totalalloc,
+              qtyAvailable(cs.itemsite_id) AS availableqoh,
+              qtyOrdered(cs.itemsite_id, DATE(<? value("date") ?>) + <? value("offset") ?>) AS ordered
+       FROM itemsite ps
+            JOIN bomitem ON ((bomitem_parent_item_id=ps.itemsite_item_id) AND
+                             (bomitem_rev_id=getActiveRevId('BOM',bomitem_parent_item_id)) AND
+                             (<? value("date") ?> BETWEEN bomitem_effective AND (bomitem_expires-1)))
+            JOIN item ON (item_id=bomitem_item_id)
+            JOIN uom ON (uom_id=item_inv_uom_id)
+            LEFT OUTER JOIN itemsite cs ON ((cs.itemsite_warehous_id=<? value("warehous_id") ?>) AND
+                                            (cs.itemsite_item_id=bomitem_item_id))
+       WHERE (ps.itemsite_item_id=<? value("item_id") ?>)
+         AND (ps.itemsite_warehous_id=<? value("warehous_id") ?>)
+         <? literal("charClause") ?>
+     ) AS data
+ORDER BY bomitem_seqnumber;

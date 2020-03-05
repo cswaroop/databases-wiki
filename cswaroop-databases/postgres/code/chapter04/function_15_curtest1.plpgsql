@@ -1,0 +1,13 @@
+create table fiverows(id serial primary key, data text);
+insert into fiverows(data) values ('one'), ('two'),
+                     ('three'), ('four'), ('five');
+
+CREATE FUNCTION curtest1(cur refcursor, tag text) 
+  RETURNS refcursor 
+AS $$
+BEGIN
+    OPEN cur FOR SELECT id, data || '+' || tag FROM fiverows;
+    RETURN cur;
+END;
+$$ LANGUAGE plpgsql;
+

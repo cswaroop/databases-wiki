@@ -1,0 +1,13 @@
+CREATE OR REPLACE FUNCTION syntax_error_rollback_test() 
+  RETURNS void
+AS $$
+plpy.execute('insert into ttable values(1)')
+try:
+   plpy.execute('SAVEPOINT foo;')
+   plpy.execute('insert into ttable values(2)')
+   plpy.execute('fail!')
+except:
+   pass
+plpy.execute('insert into ttable values(3)')
+$$ LANGUAGE plpythonu;
+

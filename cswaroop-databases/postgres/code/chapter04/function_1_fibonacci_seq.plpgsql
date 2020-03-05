@@ -1,0 +1,21 @@
+CREATE OR REPLACE FUNCTION fibonacci_seq(num integer)
+  RETURNS SETOF integer AS $$
+DECLARE
+    a int := 0;
+    b int := 1;
+BEGIN
+    IF (num <= 0)
+        THEN RETURN;
+    END IF;
+
+    RETURN NEXT a;
+    LOOP
+        EXIT WHEN num <= 1;
+        RETURN NEXT b;
+
+        num = num - 1;
+        SELECT b, a + b INTO a, b;
+    END LOOP;
+END;
+$$ language plpgsql;
+

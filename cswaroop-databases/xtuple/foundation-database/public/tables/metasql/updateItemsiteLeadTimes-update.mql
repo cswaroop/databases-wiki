@@ -1,0 +1,7 @@
+-- Group: updateItemsiteLeadTimes
+-- Name:  update
+-- Notes: used by updateItemSiteLeadTimes
+-- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- See www.xtuple.com/EULA for the full text of the software license.
+
+SELECT updateItemSiteLeadTime(<? value("itemsite_id") ?>,<? value("leadTimePad") ?>);

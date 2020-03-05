@@ -1,0 +1,17 @@
+CREATE OR REPLACE FUNCTION send_email(
+    sender text,      -- sender e-mail
+    recipients text,  -- comma-separated list of recipient addresses
+    subject text,     -- email subject
+    message text,     -- text of the message
+    smtp_server text  -- SMTP server to use for sending
+) RETURNS void 
+AS $$
+    msg = "From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s" % \
+         (sender, recipients, subject, message)
+    recipients_list = [r.strip() for r
+                                 in recipients.split(',')]
+    server = smtplib.SMTP(smtp_server)
+    server.sendmail(sender_address, recipients_list, msg)
+    server.quit()
+$$ LANGUAGE plpythonu;
+

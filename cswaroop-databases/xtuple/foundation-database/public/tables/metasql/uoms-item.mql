@@ -1,0 +1,64 @@
+-- Group: uoms
+-- Name: item
+-- Notes: used by item, bomItem, salesOrderItem, invoiceItem, creditMemoItem, woMaterialItem,
+--                returnAuthorizationItem, itemPricingScheduleItem
+-- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+-- See www.xtuple.com/CPAL for the full text of the software license.
+
+<? if exists("uom_id") ?>
+SELECT uom_id, uom_name, 'I' as code, 1 as seq
+  FROM uom
+  WHERE(uom_id=<? value("uom_id") ?>)
+UNION
+<? endif ?>
+<? if exists("uom_id2") ?>
+SELECT uom_id, uom_name, 'I' as code, 1 as seq
+  FROM uom
+  WHERE(uom_id=<? value("uom_id2") ?>)
+UNION
+<? endif ?>
+SELECT uom_id, uom_name, 'I' as code, 0 as seq
+  FROM item
+  JOIN uom ON (item_inv_uom_id=uom_id)
+ WHERE(item_id=<? value("item_id") ?>)
+UNION
+SELECT uom_id, uom_name, 'I' as code, 1 as seq
+  FROM item
+  JOIN itemuomconv ON (itemuomconv_item_id=item_id)
+  JOIN uom ON (itemuomconv_to_uom_id=uom_id)
+  JOIN itemuom ON (itemuom_itemuomconv_id=itemuomconv_id)
+  JOIN uomtype ON (uomtype_id=itemuom_uomtype_id)
+ WHERE (itemuomconv_from_uom_id=item_inv_uom_id)
+   AND (item_id=<? value("item_id") ?>)
+   AND (itemuomconv_active)
+<? if exists("uomtype") ?>
+   AND (uomtype_name=<? value("uomtype") ?>)
+<? endif ?>
+UNION
+SELECT uom_id, uom_name, 'I' as code, 1 as seq
+  FROM item
+  JOIN itemuomconv ON (itemuomconv_item_id=item_id)
+  JOIN uom ON (itemuomconv_from_uom_id=uom_id)
+  JOIN itemuom ON (itemuom_itemuomconv_id=itemuomconv_id)
+  JOIN uomtype ON (uomtype_id=itemuom_uomtype_id)
+ WHERE (itemuomconv_to_uom_id=item_inv_uom_id)
+   AND (item_id=<? value("item_id") ?>)
+   AND (itemuomconv_active)
+<? if exists("uomtype") ?>
+   AND (uomtype_name=<? value("uomtype") ?>)
+<? endif ?>
+<? if exists("includeGlobal") ?>
+UNION
+SELECT uom_id, (uom_name || <? value("global") ?>) AS uom_name, 'G' as code, 1 as seq
+  FROM item
+  JOIN uomconv ON (uomconv_to_uom_id=item_inv_uom_id)
+  JOIN uom ON (uomconv_to_uom_id=uom_id)
+ WHERE (item_id=<? value("item_id") ?>)
+UNION
+SELECT uom_id, (uom_name || <? value("global") ?>) AS uom_name, 'G' as code, 1 as seq
+  FROM item
+  JOIN uomconv ON (uomconv_from_uom_id=item_inv_uom_id)
+  JOIN uom ON (uomconv_to_uom_id=uom_id)
+ WHERE (item_id=<? value("item_id") ?>)
+<? endif ?>
+ ORDER BY seq, uom_name;

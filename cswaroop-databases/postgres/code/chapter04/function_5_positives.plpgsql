@@ -1,0 +1,12 @@
+CREATE OR REPLACE FUNCTION positives(
+                     INOUT a int, 
+                     INOUT b int, 
+                     INOUT c int)
+AS $$
+BEGIN
+    IF a < 0 THEN a = null; END IF;
+    IF b < 0 THEN b = null; END IF;
+    IF c < 0 THEN c = null; END IF;
+END;
+$$ LANGUAGE plpgsql;
+

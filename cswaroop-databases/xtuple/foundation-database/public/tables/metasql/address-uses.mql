@@ -1,0 +1,36 @@
+-- Group: address
+-- Name: uses
+-- Notes: used by address
+-- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- See www.xtuple.com/CPAL for the full text of the software license.
+
+SELECT cntct_id, 1, <? value("contact") ?> AS type, cntct_first_name,
+       cntct_last_name, crmacct_number, cntct_phone,
+       cntct_phone2, cntct_fax, cntct_email, cntct_webaddr
+FROM cntct LEFT OUTER JOIN crmacct ON (cntct_crmacct_id=crmacct_id)
+WHERE (cntct_addr_id=<? value("addr_id") ?>)
+UNION
+SELECT shipto_id, 2, <? value("shipto") ?>, shipto_name,
+       shipto_name, crmacct_number, '',
+       '', '', '', ''
+FROM shiptoinfo LEFT OUTER JOIN crmacct ON (shipto_cust_id=crmacct_cust_id)
+WHERE (shipto_addr_id=<? value("addr_id") ?>)
+UNION
+SELECT vend_id, 3, <? value("vendor") ?>, vend_number,
+       vend_name, crmacct_number, '',
+       '', '', '', ''
+FROM vendinfo LEFT OUTER JOIN crmacct ON (vend_id=crmacct_vend_id)
+WHERE (vend_addr_id=<? value("addr_id") ?>)
+UNION
+SELECT vendaddr_id, 4, <? value("vendaddr") ?>, vendaddr_code,
+       vendaddr_name, crmacct_number, '',
+       '', '', '', ''
+FROM vendaddrinfo LEFT OUTER JOIN crmacct ON (vendaddr_vend_id=crmacct_vend_id)
+WHERE (vendaddr_addr_id=<? value("addr_id") ?>)
+UNION
+SELECT warehous_id, 5, <? value("whs") ?>, warehous_code,
+       warehous_descrip, '', '',
+       '', '', '', ''
+FROM whsinfo
+WHERE (warehous_addr_id=<? value("addr_id") ?>)
+ORDER BY 3, 5, 4;

@@ -1,0 +1,21 @@
+CREATE FUNCTION curtest2(tag1 text, tag2 text) 
+  RETURNS SETOF fiverows 
+AS $$
+DECLARE
+    cur1 refcursor;
+    cur2 refcursor;
+    row record;
+BEGIN
+    cur1 = curtest1(NULL, tag1);
+    cur2 = curtest1(NULL, tag2);
+    LOOP
+        FETCH cur1 INTO row;
+        EXIT WHEN NOT FOUND ;
+        RETURN NEXT row;
+        FETCH cur2 INTO row;
+        EXIT WHEN NOT FOUND ;
+        RETURN NEXT row;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+

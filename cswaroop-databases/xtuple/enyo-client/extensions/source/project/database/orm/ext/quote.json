@@ -1,0 +1,26 @@
+[
+  {
+    "context": "project",
+    "nameSpace": "XM",
+    "type": "Quote",
+    "table": "xt.quheadinfo",
+    "isExtension": true,
+    "comment": "Extended by Project",
+    "relations": [
+      {
+        "column": "quhead_id",
+        "inverse": "id"
+      }
+    ],
+    "properties": [
+      {
+        "name": "project",
+        "attr": {
+          "type": "Number",
+          "column": "quhead_prj_id"
+        }
+      }
+    ],
+    "isSystem": true
+  }
+]

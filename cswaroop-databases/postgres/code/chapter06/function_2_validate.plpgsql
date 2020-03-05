@@ -1,0 +1,24 @@
+CREATE OR REPLACE FUNCTION validate_us_zip(zipcode TEXT) 
+  RETURNS boolean 
+AS $$
+DECLARE
+	digits text;
+BEGIN
+	-- remove anything that is not a digit (POSIX compliantly, please)
+	digits := (SELECT regexp_replace(zipcode,'[^[:digit:]]','','g'));
+
+	IF digits = '' THEN
+		RAISE EXCEPTION 'Zipcode does not contain any digits --> %', digits USING HINT = 'Is this a US zip code?', ERRCODE = 'P9999';
+	ELSIF length(digits) < 5 THEN
+		RAISE EXCEPTION 'Zipcode does not contain enough digits --> %', digits USING HINT = 'Zip code has less than 5 digits.', ERRCODE = 'P9998';
+	ELSIF length(digits) > 9 THEN
+		RAISE EXCEPTION 'Unnecessary digits in zip code --> %', digits USING HINT = 'Zip code is more than 9 digits.', ERRCODE = 'P9997';
+	ELSIF length(digits) > 5 AND length(digits) < 9 THEN
+		RAISE EXCEPTION 'Zip code can not be processed --> %', digits USING HINT = 'Zip code abnormal length.', ERRCODE = 'P9996';
+	ELSE
+		RETURN true;
+	END IF;
+
+END;
+$$ LANGUAGE plpgsql;
+

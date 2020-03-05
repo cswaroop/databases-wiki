@@ -1,0 +1,15 @@
+-- Group: images 
+-- Name: list
+-- Notes: Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+
+SELECT image_id, image_name, image_descrip,
+       <? if exists("displayImageSize") ?>
+         LENGTH(image_data) AS image_size,
+       <? endif ?>
+       CASE WHEN nspname='public' THEN ''
+            ELSE nspname END AS nspname
+FROM image, pg_class, pg_namespace
+WHERE ((image.tableoid=pg_class.oid)
+AND  (relnamespace=pg_namespace.oid))
+ORDER BY image_name;

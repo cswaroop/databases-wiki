@@ -1,0 +1,7 @@
+CREATE FUNCTION gethostbyname(hostname text) 
+  RETURNS inet
+AS $$
+  import socket
+  return socket.gethostbyname(hostname)
+$$ LANGUAGE plpythonu SECURITY DEFINER;
+

@@ -1,0 +1,7 @@
+CREATE OR REPLACE FUNCTION installed_languages()
+  RETURNS SETOF pg_language AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM  pg_language;
+END;
+$$ LANGUAGE plpgsql;
+

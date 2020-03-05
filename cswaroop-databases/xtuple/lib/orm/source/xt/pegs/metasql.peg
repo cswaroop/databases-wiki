@@ -1,0 +1,743 @@
+/**
+ * MetaSQL PEG.js Grammar
+ * ======================
+ *
+ * This file is a PEG.js [1] Grammar for xTuple's MetaSQL language. It is used
+ * to generate a Javascipt parser that can be passed a MetaSQL query string and
+ * an options object containing a params object. The parser returns a SQl query
+ * string with all MetaSQL parsed and replaced with the appropriate params
+ * values.
+ *
+ * MetaSQL[2] is a scripting language developed by xTuple for use by the report
+ * writer. The language is designed to handle dynamic database queries. MetaSQL
+ * statements are embedded within standard SQL—for example, within the Query
+ * Source of a report definition. When a report is run, a parsing engine
+ * interprets the MetaSQL using a list of named parameters. The parsed result
+ * is standard SQL, which in turn is sent to the target database.
+ *
+ * [1] http://pegjs.org/
+ * [2] http://www.xtuple.org/node/270
+ *
+ * Example generated parser usage:
+ *  var options = {
+ *        params: {
+ *          foo: 'bar'
+ *        }
+ *      },
+ *      metaSQL: 'SELECT <? value("foo") ?> AS baz;';
+ *
+ *  parser.parse(metaSQL, options); // returns "SELECT 'bar' AS baz;"
+ *
+ * TODO:
+ * - Add legacy mode flag
+ * - break - currently fails like the old C++ parser.
+ * - continue - currently fails like the old C++ parser.
+ * - Support parameterized query output.
+ */
+
+/**
+ * PEG.js grammar initializer
+ */
+{
+  // The default params below are for the MetaSQL test here: https://github.com/xtuple/openrpt/blob/master/MetaSQL/test.mql
+  params = options.params ? options.params : {
+      start: true
+      ,test_0_1_0: 'test_0_1_0'
+      ,test_0_1_2: ['test_0_1_2']
+      ,test_0_1_3: ['test_0_1_3', 'test_0_1_3_2', 'test_0_1_3_3']
+      ,test_0_1_4: 'true THEN true END AS test_0_1_4) AS tests; SELECT current_user--'
+      ,test_0_2_0: 'test_0_2_0'
+      ,test_0_2_2: ['test_0_2_2']
+      ,test_0_2_3: ['test_0_2_3','test_0_2_3_2', 'test_0_2_3_3']
+      ,test_0_2_4: "(SELECT usr_username FROM usr WHERE usr_username = 'admin')"
+      ,test_0_3_0: true
+      ,test_0_3_2: null
+      ,test_0_3_3: ''
+      ,test_0_3_4: 'true THEN true END AS test_0_3_4) AS test; SELECT current_user--'
+      ,test_0_4_0a: 'test_0_4_0'
+      ,test_0_4_2a: null
+      ,test_0_4_3a: ''
+      ,test_0_4_4a: 'true THEN true END AS test_0_4_4) AS test; SELECT current_user--'
+      ,test_0_5_0: ['test_0_5_0']
+      ,test_0_5_1: ['test_0_5_1','test_0_5_1_2', 'test_0_5_1_3']
+      ,test_0_5_2: 'test_0_5_2'
+      ,test_0_5_4: ['true THEN true END AS test_0_5_4) AS test; SELECT current_user--']
+      ,test_0_6_0: ['test_0_6_0']
+      ,test_0_6_1: ['test_0_6_1','test_0_6_1_2', 'test_0_6_1_3']
+      ,test_0_6_2: 'test_0_6_2'
+      ,test_0_6_4: ['true THEN true END AS test_0_6_4) AS test; SELECT current_user--']
+      ,test_1_3_0: 'test_1_3_0'
+      ,test_1_3_1: 'test_1_3_1'
+      ,test_1_3_1_2: 'test_1_3_1_2'
+      ,test_2_3_0: 'test_2_3_0'
+      ,test_2_3_1: 'test_2_3_1'
+      ,test_3_3_0: 'test_3_3_0'
+      ,test_3_3_1: 'test_3_3_1'
+      ,test_3_3_2: 'test_3_3_2'
+      ,test_4_0_0: ['test_4_0_0', 'test_4_0_0_2', 'test_4_0_0_3']
+      ,test_4_0_1: ['true THEN true END AS test_4_0_1) AS test; SELECT current_user--']
+      ,test_41_0_0: ['test_41_0_0', 'test_41_0_0_2', 'test_41_0_0_3']
+      ,test_42_0_0: ['test_42_0_0', 'test_42_0_0_2', 'test_42_0_0_3']
+      ,test_43_0_0: ['test_43_0_0', 'test_43_0_0_2', 'test_43_0_0_3']
+      ,test_4_1_0: 'test_4_1_0'
+      ,test_4_1_2: ['test_4_1_2']
+      ,test_4_1_3: ['test_4_1_3', 'test_4_1_3_2', 'test_4_1_3_3']
+      ,test_4_1_4: ['test_4_1_4', 'test_4_1_4_2', 'test_4_1_4_3']
+      ,test_4_1_42: 'test_4_1_42'
+      ,test_4_1_5: ['test_4_1_5', 'test_4_1_5_2', 'test_4_1_5_3']
+      ,test_4_1_52: ['test_4_1_52']
+      ,test_4_1_6: ['test_4_1_6', 'test_4_1_6_2', 'test_4_1_6_3']
+      ,test_4_1_62: ['test_4_1_62', 'test_4_1_62_2', 'test_4_1_62_3']
+      ,test_4_1_7: [1]
+      ,test_4_1_8: [true]
+      ,test_4_2_0: 'test_4_2_0'
+      ,test_4_2_2: ['test_4_2_2']
+      ,test_4_2_3: ['test_4_2_3', 'test_4_2_3_2', 'test_4_2_3_3']
+      ,test_4_2_4: ['test_4_2_4', 'test_4_2_4_2', 'test_4_2_4_3']
+      ,test_4_2_42: 'test_4_2_42'
+      ,test_4_2_5: ['test_4_2_5', 'test_4_2_5_2', 'test_4_2_5_3']
+      ,test_4_2_52: ['test_4_2_52']
+      ,test_4_2_6: ['test_4_2_6', 'test_4_2_6_2', 'test_4_2_6_3']
+      ,test_4_2_62: ['test_4_2_62', 'test_4_2_62_2', 'test_4_2_62_3']
+      ,test_4_3_0: ['test_4_3_0']
+      ,test_4_3_01: 'test_4_3_01'
+      ,test_4_3_1: ['test_4_3_1']
+      ,test_4_3_2: ['test_4_3_2']
+      ,test_4_3_21: null
+      ,test_4_3_3: ['test_4_3_3']
+      ,test_4_3_31: ''
+      ,test_4_4_0: ['test_4_4_0']
+      ,test_4_4_01: 'test_4_4_01'
+      ,test_4_4_1: ['test_4_4_1']
+      ,test_4_4_2: ['test_4_4_2']
+      ,test_4_4_21: null
+      ,test_4_4_3: ['test_4_4_3']
+      ,test_4_4_31: ''
+      ,test_4_5_0: ['test_4_5_0']
+      ,test_4_5_1: ['test_4_5_1', 'test_4_5_1_2']
+      ,test_4_5_2: ['test_4_5_2', 'test_4_5_2_2']
+      ,test_4_5_3: ['test_4_5_3']
+      ,test_4_5_32: 'test_4_5_32'
+      ,test_4_5_4: ['test_4_5_4']
+      ,test_4_6_0: ['test_4_6_0']
+      ,test_4_6_1: ['test_4_6_1', 'test_4_6_1_2']
+      ,test_4_6_2: ['test_4_6_2', 'test_4_6_2_2']
+      ,test_4_6_3: ['test_4_6_3']
+      ,test_4_6_32: 'test_4_6_32'
+      ,test_4_6_4: ['test_4_6_4']
+      ,test_4_7_0: ['test_4_7_0', 'test_4_7_0_2', 'test_4_7_0_3']
+      ,test_4_8_0: ['test_4_8_0', 'test_4_8_0_2', 'test_4_8_0_3']
+      ,test_44_0_0: ['test_44_0_0', 'test_44_0_0_2']
+      ,test_44_0_02: ['test_44_0_02', 'test_44_0_02_2']
+      ,test_44_0_1: ['test_44_0_1', 'test_44_0_1_2']
+      ,test_441_0_0: ['test_441_0_0', 'test_441_0_0_2']
+      ,test_441_0_02: ['test_441_0_02', 'test_441_0_02_2']
+      ,test_442_0_0: ['test_442_0_0', 'test_442_0_0_2']
+      ,test_442_0_02: ['test_442_0_02', 'test_442_0_02_2']
+      ,test_443_0_0: ['test_443_0_0', 'test_443_0_0_2', 'test_443_0_0_3']
+      ,test_443_0_02: ['test_443_0_02', 'test_443_0_02_2', 'test_443_0_02_3']
+      ,test_444_0_0: ['test_444_0_0', 'test_444_0_0_2']
+      ,test_444_0_02: ['test_444_0_02', 'test_444_0_01_2']
+      ,test_444_0_03: ['test_444_0_03', 'test_444_0_01_3']
+      ,end: true
+    }
+  ,loopstack = options.loopstack ? options.loopstack : []
+  ,stackIdx = function (id) {
+      var idx = 1;
+
+      if (loopstack.length > 0) {
+        for (idx = 0; idx < loopstack.length; idx++) {
+          if (loopstack[idx].id === id) {
+            break;
+          }
+        }
+      }
+
+      return idx;
+    }
+  ,extractList = function (list, index) {
+      var result = new Array(list.length),
+          i;
+
+      for (i = 0; i < list.length; i++) {
+        result[i] = list[i][index];
+      }
+
+      return result;
+    }
+  ,buildList = function (first, rest, index) {
+      return [first].concat(extractList(rest, index));
+    }
+  ,optionalList = function (value) {
+      return value !== null ? value : [];
+    }
+}
+
+/**
+ * Grammar startRule
+ */
+Start
+  = start:__ metasql:MetaSQL end:__ {
+      return start.join('') + metasql + end.join('');
+    }
+
+/**
+ * MetaSQL Grammer
+ */
+MetaSQL
+  = sql:SourceElements? {
+      return sql;
+    }
+
+SourceElements
+  = first:(SourceElement) rest:(SourceElement)* {
+      return first + rest.join('');
+    }
+
+SourceElement
+  = quoted:QuotedString {
+      //return "quoted: " + quoted;
+      return quoted;
+    }
+  / comment:Comment {
+      //return "comment: " + comment;
+      return comment;
+    }
+  / state:Statement {
+      //return "statement: " + state;
+      return state;
+    }
+  / sql:SQLText {
+      //return "sql: " + sql;
+      return sql;
+    }
+
+/**
+ * MetaSQL Statements
+ */
+Statement
+  = value:MQLValue {
+      //return "MQLValue: " + value;
+      return value;
+    }
+  / literal:MQLLiteral {
+      //return "MQLLiteral: " + literal;
+      return literal;
+    }
+  / loopcontrol:MQLLoopControl {
+      //return "MQLLoopControl: " + loopcontrol;
+      return loopcontrol;
+    }
+  / rawcond:MQLRawMQLCondition {
+      //return "MQLRawMQLCondition: " + rawcond;
+      return rawcond;
+    }
+  / controlstate:MQLControlStatement {
+      //return "MQLControlStatement: " + controlstate;
+      return controlstate;
+    }
+  / generic:MQLGeneric {
+      //return "MQLGeneric: " + generic;
+      return generic;
+    }
+
+MQLValue
+  = MQLOpen WhiteSpace? Value WhiteSpace? '(' WhiteSpace? id:QuotedIdentifier WhiteSpace? ')' WhiteSpace? MQLClose {
+      var stackidx,
+          listidx;
+
+      if (Object.prototype.toString.call(params[id]) === '[object Array]') {
+        stackidx = stackIdx(id);
+
+        if (stackidx < loopstack.length) {
+          listidx = loopstack[stackidx].count;
+
+          if (listidx >= params[id].length) {
+            listidx = params[id].length - 1;
+          }
+
+          if (typeof params[id][0] == 'string') {
+            return ("'" + params[id][listidx] + "'");
+          } else {
+            return params[id][listidx];
+          }
+        }
+        else {
+          // Not in a foreach loop
+          if (typeof params[id][0] == 'string') {
+            return "'" + params[id][0] + "'";
+          } else {
+            return params[id][0];
+          }
+        }
+      }
+
+      if (typeof params[id] == 'string') {
+        return ("'" + (params[id] ? params[id] : 'NULL ') + "'");
+      } else {
+        return (params[id] ? params[id] : 'NULL ');
+      }
+    }
+
+MQLLiteral
+  = MQLOpen WhiteSpace? Literal WhiteSpace? '(' WhiteSpace? id:QuotedIdentifier WhiteSpace? ')' WhiteSpace? MQLClose {
+      var stackidx,
+          listidx;
+
+      if (Object.prototype.toString.call(params[id]) === '[object Array]') {
+        stackidx = stackIdx(id);
+
+        if (stackidx < loopstack.length) {
+          listidx = loopstack[stackidx].count;
+
+          if (listidx >= params[id].length) {
+            listidx = params[id].length - 1;
+          }
+
+          return params[id][listidx];
+        }
+        else {
+          // Not in a foreach loop
+          return params[id][0];
+        }
+      }
+
+      return (params[id] ? params[id] : '');
+    }
+
+MQLLoopControl
+  = MQLOpen WhiteSpace? loop:MQLLoopFunction WhiteSpace? MQLClose {
+      return loop;
+    }
+
+MQLRawMQLCondition
+  = MQLOpen WhiteSpace? cond:MQLCondition WhiteSpace? MQLClose {
+      return cond;
+    }
+
+MQLControlStatement
+  = ifcond:MQLIf ifbody:(!(MQLElse / MQLElseIf / MQLEndIf) SourceElement)* MQLEndIf {
+      if (ifcond) {
+        return (ifbody ? extractList(ifbody, 1).join('') : '');
+      } else {
+        return '';
+      }
+    }
+  / ifcond:MQLIf ifbody:(!(MQLElse / MQLElseIf / MQLEndIf) SourceElement)*
+    MQLElse elsebody:(!(MQLElseIf / MQLEndIf) SourceElement)* MQLEndIf {
+      if (ifcond) {
+        return (ifbody ? extractList(ifbody, 1).join('') : '');
+      } else {
+        return (elsebody ? extractList(elsebody, 1).join('') : '');
+      }
+    }
+  / ifcond:MQLIf ifbody:(!(MQLElse / MQLElseIf / MQLEndIf) SourceElement)*
+    elseifwraper:(MQLElseIf (!(MQLElseIf / MQLElse / MQLEndIf) SourceElement)*)*
+    MQLElse elsebody:(!(MQLEndIf) SourceElement)* MQLEndIf {
+      if (ifcond) {
+        return (ifbody ? extractList(ifbody, 1).join('') : '');
+      }
+
+      if (elseifwraper !== null) {
+        for (var i = 0; i < elseifwraper.length; i++) {
+          // Find a valid elseif if any exists.
+          if (elseifwraper[i][0]) {
+            return (elseifwraper[i][1] ? extractList(elseifwraper[i][1], 1).join('') : '');
+          }
+        }
+      }
+
+      // The ifcond and elseifwraper conditions did not match.
+      return (elsebody ? extractList(elsebody, 1).join('') : '');
+    }
+  / wrapper:ForEachWrapper {
+      var body = wrapper.body,
+          foreachcond = wrapper.foreachstart.id,
+          foreachtext = wrapper.foreachstart.text,
+          extractedbody = '',
+          result = '',
+          stackidx = stackIdx(foreachcond),
+          extractForeach = function (foreachbody) {
+            var foreachraw = '';
+
+            for (var k = 0; k < foreachbody.length; k++) {
+              // Index [k][1] is a nested foreach, build it recursively.
+              if (foreachbody[k][1]) {
+                foreachraw += foreachbody[k][1].foreachstart.text;
+                foreachraw += extractForeach(foreachbody[k][1].body);
+                foreachraw += foreachbody[k][1].foreachend;
+              }
+
+              // Index [k][2] is this foreach's body text.
+              foreachraw += foreachbody[k][2];
+            }
+
+            return foreachraw;
+          };
+
+      extractedbody += extractForeach(body);
+
+      if (params[foreachcond]) {
+        if (Object.prototype.toString.call(params[foreachcond]) === '[object Array]') {
+          for (var i = 0; i < params[foreachcond].length; i++) {
+            var recurseOptions = {
+                  loopstack: loopstack
+                };
+
+            // Call the parser recursively on the body.
+            result += parser.parse(extractedbody, recurseOptions);
+
+            loopstack[stackidx].count++;
+          }
+
+          loopstack.shift().id;
+          return result;
+        } else {
+          return '';
+        }
+      }
+    }
+
+MQLGeneric
+  = start:MQLOpen body:(!MQLClose SourceCharacter)* end:MQLClose {
+      return start + (body ? extractList(body, 1).join('') : '') + end;
+    }
+
+/**
+ * MetaSQL Helpers
+ */
+MQLCondition
+  = Not WhiteSpace Exists WhiteSpace? '(' WhiteSpace? id:QuotedIdentifier WhiteSpace? ')' {
+      return ! (id in params);
+    }
+  / Exists WhiteSpace? '(' WhiteSpace? id:QuotedIdentifier WhiteSpace? ')' {
+      return (id in params);
+    }
+  / ReExists WhiteSpace? '(' WhiteSpace? re:RegExp WhiteSpace? ')' {
+      for (var prop in params) {
+        if (prop.match(re)) {
+          return true;
+        }
+      }
+
+      return '';
+    }
+  / IsFirst WhiteSpace? '(' WhiteSpace? id:QuotedIdentifier WhiteSpace? ')' {
+      var stackidx = stackIdx(id);
+
+      if (Object.prototype.toString.call(params[id]) === '[object Array]') {
+        if (stackidx < loopstack.length) {
+          listidx = loopstack[stackidx].count;
+
+          // Figure out if this is the first item in the array.
+          if (listidx === 0) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+        else {
+          // Not in a foreach loop
+          return (id in params);
+        }
+      } else {
+        // Not a list parameter or does not exist.
+        return true;
+      }
+    }
+  / IsLast  WhiteSpace? '(' WhiteSpace? id:QuotedIdentifier WhiteSpace? ')' {
+      var stackidx = stackIdx(id);
+
+      if (Object.prototype.toString.call(params[id]) === '[object Array]') {
+        if (stackidx < loopstack.length) {
+          listidx = loopstack[stackidx].count;
+
+          // Figure out if this is the last item in the array.
+          if (listidx === (params[id].length - 1)) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+        else {
+          // Not in a foreach loop
+          if ((id in params) && params[id].length === 1) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      } else {
+        // Not a list parameter or does not exist.
+        return false;
+      }
+    }
+
+MQLIf
+  = MQLOpen WhiteSpace? If WhiteSpace? cond:MQLCondition WhiteSpace? MQLClose {
+      return cond;
+    }
+
+MQLElseIf
+  = MQLOpen WhiteSpace? ElseIf WhiteSpace? cond:MQLCondition WhiteSpace? MQLClose {
+      return cond;
+    }
+
+MQLElse
+  = MQLOpen WhiteSpace? Else WhiteSpace? MQLClose
+
+MQLEndIf
+  = MQLOpen WhiteSpace? EndIf WhiteSpace? MQLClose
+
+MQLForeach
+  = MQLOpen WhiteSpace? Foreach WhiteSpace? '(' WhiteSpace? id:QuotedIdentifier WhiteSpace? ')' WhiteSpace? MQLClose {
+      loopstack.unshift({ id: id, count: 0 });
+
+      return {
+        text: text(),
+        id: id
+      };
+    }
+
+MQLEndForeach
+  = MQLOpen WhiteSpace? EndForeach WhiteSpace? MQLClose {
+      return text();
+    }
+
+ForEachWrapper
+  = foreachstart:MQLForeach body:(!(MQLEndForeach) ForEachWrapper? SourceCharacter)* foreachend:MQLEndForeach {
+      var wrapper = {
+        foreachstart: foreachstart,
+        body: body,
+        foreachend: foreachend
+      };
+
+      return wrapper;
+    }
+
+MQLLoopFunction
+  = Continue WhiteSpace? loop:(MQLLoopCount)? {
+      // TODO: Figure out what the passed loop count is.
+      // TODO: Figure out where we are in the loop.
+      // TODO: Continue logic.
+      loop = loop || 1;
+      return '';
+    }
+  / Break WhiteSpace? loop:(MQLLoopCount)? {
+      // TODO: Figure out what the passed loop count is.
+      // TODO: Figure out where we are in the loop.
+      // TODO: Break logic.
+      loop = loop || 1;
+      return '';
+    }
+
+MQLLoopCount
+  = '(' WhiteSpace? loop:DecimalDigit* WhiteSpace? ')' {
+      return loop;
+    }
+
+MQLOpen    = '<?'
+MQLClose   = '?>'
+Value      = [Vv] [Aa] [Ll] [Uu] [Ee]
+Literal    = [Ll] [Ii] [Tt] [Ee] [Rr] [Aa] [Ll]
+If         = [Ii] [Ff]
+ElseIf     = [Ee] [Ll] [Ss] [Ee] [Ii] [Ff]
+Else       = [Ee] [Ll] [Ss] [Ee]
+EndIf      = [Ee] [Nn] [Dd] [Ii] [Ff]
+Not        = [Nn] [Oo] [Tt]
+Exists     = [Ee] [Xx] [Ii] [Ss] [Tt] [Ss]
+ReExists   = [Rr] [Ee] [Ee] [Xx] [Ii] [Ss] [Tt] [Ss]
+IsFirst    = [Ii] [Ss] [Ff] [Ii] [Rr] [Ss] [Tt]
+IsLast     = [Ii] [Ss] [Ll] [Aa] [Ss] [Tt]
+Foreach    = [Ff] [Oo] [Rr] [Ee] [Aa] [Cc] [Hh]
+EndForeach = [Ee] [Nn] [Dd] [Ff] [Oo] [Rr] [Ee] [Aa] [Cc] [Hh]
+Continue   = [Cc] [Oo] [Nn] [Tt] [Ii] [Nn] [Uu] [Ee]
+Break      = [Bb] [Rr] [Ee] [Aa] [Kk]
+
+/**
+ * Simple SQL Grammer
+ */
+SQLText
+  = text:(SQLPattern) {
+      return (text ? text : '');
+    }
+
+SQLPattern
+  = body:SourceCharacter {
+      return (body ? body : '');
+    }
+
+/**
+ * Generic Grammar
+ */
+SourceCharacter
+  = .
+
+WhiteSpace "whitespace"
+  = ("\t"
+  / "\v"
+  / "\f"
+  / " "
+  / "\u00A0"
+  / "\uFEFF"
+  / Zs)+
+
+LineTerminator
+  = line:[\n\r\u2028\u2029] {
+      return line + '&';
+    }
+
+LineTerminatorSequence "end of line"
+  = "\n"
+  / "\r\n"
+  / "\r"
+  / "\u2028"
+  / "\u2029"
+
+DecimalDigit
+  = [0-9]
+
+HexDigit
+  = [0-9a-f]i
+
+RegExp
+  = "'" str:([^']*) "'" {
+      return str.join("");
+    }
+  / '"' str:([^"]*) '"' {
+      return str.join("");
+    }
+
+Comment "comment"
+  = MultiLineComment
+  / SingleLineComment
+
+MultiLineComment
+  = start:"/*" body:(!"*/" SourceCharacter)* end:"*/" {
+      return start + (body ? extractList(body, 1).join('') : '') + end;
+    }
+
+MultiLineCommentNoLineTerminator
+  = start:"/*" body:(!("*/" / LineTerminator) SourceCharacter)* end:"*/" {
+      return start + (body ? extractList(body, 1).join('') : '') + end;
+    }
+
+SingleLineComment
+  = start:"--" body:(!LineTerminator SourceCharacter)* {
+      return start + (body ? extractList(body, 1).join('') : '');
+    }
+
+QuotedIdentifier "quoted identifier"
+  = SingleQuotedIdentifier
+  / DoubleQuotedIdentifier
+
+SingleQuotedIdentifier
+  = start:"'" body:SingleStringCharacter* end:"'" {
+      return (body ? body.join('') : '');
+    }
+
+DoubleQuotedIdentifier
+  = start:'"' body:DoubleStringCharacter* end:'"' {
+      return (body ? body.join('') : '');
+    }
+
+QuotedString "quoted string"
+  = SingleQuotedString
+  / DoubleQuotedString
+
+SingleQuotedString
+  = start:"'" body:SingleStringCharacter* end:"'" {
+      return start + (body ? body.join('') : '') + end;
+    }
+
+DoubleQuotedString
+  = start:'"' body:DoubleStringCharacter* end:'"' {
+      return start + (body ? body.join('') : '') + end;
+    }
+
+DoubleStringCharacter
+  = !('"' / "\\" / LineTerminator) SourceCharacter {
+      return text();
+    }
+  / "\\" sequence:EscapeSequence {
+      return sequence;
+    }
+  / LineContinuation
+
+SingleStringCharacter
+  = !("'" / "\\" / LineTerminator) SourceCharacter {
+      return text();
+    }
+  / "\\" sequence:EscapeSequence {
+      return sequence;
+    }
+  / LineContinuation
+
+LineContinuation
+  = "\\" LineTerminatorSequence {
+      return "";
+    }
+
+EscapeSequence
+  = CharacterEscapeSequence
+  / "0" !DecimalDigit {
+      return "\0";
+    }
+  / HexEscapeSequence
+  / UnicodeEscapeSequence
+
+CharacterEscapeSequence
+  = SingleEscapeCharacter
+  / NonEscapeCharacter
+
+SingleEscapeCharacter
+  = "'"
+  / '"'
+  / "\\"
+  / "b"  {
+      return "\b";
+    }
+  / "f"  {
+      return "\f";
+    }
+  / "n"  {
+      return "\n";
+    }
+  / "r"  {
+      return "\r";
+    }
+  / "t"  {
+      return "\t";
+    }
+  / "v"  {
+      return "\x0B"; // IE does not recognize "\v".
+    }
+
+NonEscapeCharacter
+  = !(EscapeCharacter / LineTerminator) SourceCharacter {
+      return text();
+    }
+
+EscapeCharacter
+  = SingleEscapeCharacter
+  / DecimalDigit
+  / "x"
+  / "u"
+
+HexEscapeSequence
+  = "x" digits:$(HexDigit HexDigit) {
+      return String.fromCharCode(parseInt(digits, 16));
+    }
+
+UnicodeEscapeSequence
+  = "u" digits:$(HexDigit HexDigit HexDigit HexDigit) {
+      return String.fromCharCode(parseInt(digits, 16));
+    }
+__
+  = (WhiteSpace / LineTerminatorSequence / Comment)*
+
+_
+  = (WhiteSpace / MultiLineCommentNoLineTerminator)*
+
+// Separator, Space
+Zs = [\u0020\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]

@@ -1,0 +1,111 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="Consumer" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ait="http://dataorchestrator.fico.com/activityinput" xmlns:dat="http://dataorchestrator.fico.com/data" xmlns:aut="http://dataorchestrator.fico.com/authorization" xmlns:flw="http://dataorchestrator.fico.com/workflow" xmlns:wor="http://dataorchestrator.fico.com/workitem" xmlns:ws="http://ws.dataorchestrator.fico.com/" xmlns:res="http://dataorchestrator.fico.com/response">    
+    <soapenv:Header/>
+    <soapenv:Body>
+        <ws:getResponse>
+
+            <!--Zero or more repetitions:-->
+            <ait:ActivityInput Ref="1" xsi:type="ait:BureauActivityInput">
+            	<InquiryParameter Name="CodeId" Value="S600000016"/>
+            	<InquiryParameter Name="ProductCode" Value="31"/>
+            	<InquiryParameter Name="OutputType" Value="XML"/>
+            	<InquiryParameter Name="IPAddress" Value="194.60.191.250"/>
+            	<InquiryParameter Name="Environment" Value="TEST_SDP"/>
+            	<InquiryParameter Name="UserId" Value="GMACXMLT "/>
+            	<InquiryParameter Name="Password" Value="02BB4E1087"/>
+            	<InquiryParameter Name="TypeOfCertificate" Value="SICSDPLNK7"/>
+            	<InquiryParameter Name="RequestType" Value="3CCN"/>
+            	<InquiryParameter Name="ReferenceNumber" Value="TEST_01"/>
+            	<InquiryParameter Name="AccessType" Value="C"/>
+            	<InquiryParameter Name="BranchCode" Value="0"/>
+            	<InquiryParameter Name="DepartmentCode" Value="0"/>
+            	<InquiryParameter Name="FlagDetect" Value="N"/>
+            	<InquiryParameter Name="ProfileDetect" Value=" "/>
+            	<InquiryParameter Name="SummaryFlag" Value="Y"/>
+            	<InquiryParameter Name="ScipafiProfile" Value="Y"/>
+            	<InquiryParameter Name="FinalDecision" Value="A"/>
+            	<InquiryParameter Name="FinalDecisionDate" Value="07042017"/>
+            	<InquiryParameter Name="RequestDate" Value="07042017"/>
+            	<InquiryParameter Name="RequestTime" Value="105223"/>
+            </ait:ActivityInput>
+                                                 
+            <!--Zero or more repetitions:-->
+            <dat:Data xsi:type="ns1:Consumer" 
+            		  Ref="1"  
+            		  ApplicantType="T" 
+            		  FirstName="ENRICO" 
+            		  LastName="ABBA"
+         			  BirthDate="1946-02-18" 
+         			  Gender="M" 
+         			  BirthPlace="MELEGNANO" 
+         			  BirthProvince="MI" 
+         			  Catastale="F100"
+         			  State="015140" 
+         			  TaxCode="BBANRC46B18F100O" 
+         			  TaxCodeFlag="G" 
+         			  VatNumber="Vat001" 
+         			  VatNumberDate="2000-02-18" 
+        		 	  MaritalStatus="G" 
+        		 	  ResidentialStatus="P" 
+        		 	  EmploymentType="02" 
+        		 	  Occupation="02" 
+        		 	  YearsInEmploylemt="5" 
+         			  RequestNumber="Request01" 
+         			  FinanceType="02" 
+         			  FinancePurpose="06" 
+         			  RequestedAmount="000100000" 
+         			  InstallmentNumbers="060" 
+         			  EmployerName="FICO"
+         			  DealerIva="8456217"  
+         			  NetMonthlyIncome="1600" 
+         			  NetAnnualIncome="28000">
+			      <Address AddressType="RA" 
+			      		StreetName="L GO BACHELET" 
+			      		StreetNumber="1" 
+			      		Town="GUIDONIA MONTECELIO" 
+			      		Zip="00012"
+			      	     Province="RM" 
+			      	     Catastale="E263" 
+			      	     State="058047" 
+			      	     YearsAtAddress="02"/>
+			      <PreviousAddress AddressType="RA" 
+			      		        StreetName="Main Street" 
+			      		        StreetNumber="25" 
+			      		        Town="GUIDONIA MONTECELIO" 
+			      		        Zip="00012"
+			      		        Province="RM" 
+			      		        Catastale="E263" 
+			      		        State="058047" 
+			      		        YearsAtAddress="02"/>
+			      <Phone AreaCode="98757" Number="65412398" /> 
+			      <WorkPhone AreaCode="74536" Number="98731864" /> 
+			      <Financial AbiCode="ABI01" 
+			      		  CabCode="CAB01" 
+			      		  BankAccountNumber="ACCOUNT01" 
+			      		  BankAccountAge="0002"
+			      		  IbanCode="IBAN000001" 
+			      		  BicCode="BIC00001"/>
+			      <Identification Type="P" 
+			      		       Number="Passport0123456" 
+			      		       IssueDate="2000-07-12" 
+			      		       ExpiryDate="2020-06-12" 
+			      		       IssuingAuthority="02"/>
+
+            </dat:Data>
+
+            <!--Zero or more repetitions:-->
+            <flw:WorkFlow Ref="TestFlow">
+                <Activity xsi:type="flw:BureauActivity" Ref="1" ProviderName="ExperianCervedConsumer" ParameterRef="1">
+                    <Output Name="BureauRequest"/>
+                    <Output Name="BureauResponse"/>
+                    <Output Name="ReadableResponse"/>
+                </Activity>
+            </flw:WorkFlow>
+            
+            <!--Zero or more repetitions:-->
+            <wor:WorkItem Ref="1" FlowRef="TestFlow">
+                <ItemData DataRef="1"/>
+            </wor:WorkItem>
+
+        </ws:getResponse>
+    </soapenv:Body>
+</soapenv:Envelope>

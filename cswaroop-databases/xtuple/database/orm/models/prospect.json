@@ -1,0 +1,193 @@
+[
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "Prospect",
+    "table": "prospect",
+    "isRest": true,
+    "idSequenceName": "cust_cust_id_seq",
+    "lockable": true,
+    "orderSequence": "CRMAccountNumber",
+    "comment": "Prospect Map",
+    "privileges": {
+      "all": {
+        "create": "MaintainProspectMasters",
+        "read": "ViewProspectMasters",
+        "update": "MaintainProspectMasters",
+        "delete": "MaintainProspectMasters"
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "prospect_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "number",
+        "attr": {
+          "type": "String",
+          "column": "prospect_number",
+          "isNaturalKey":true,
+          "required": true
+        }
+      },
+      {
+        "name": "name",
+        "attr": {
+          "type": "String",
+          "column": "prospect_name",
+          "required": true
+        }
+      },
+      {
+        "name": "notes",
+        "attr": {
+          "type": "String",
+          "column": "prospect_comments"
+        }
+      },
+      {
+        "name": "contact",
+        "toOne": {
+          "isNested": true,
+          "type": "ContactRelation",
+          "column": "prospect_cntct_id",
+          "inverse": "id"
+        }
+      },
+      {
+        "name": "salesRep",
+        "toOne": {
+          "type": "SalesRep",
+          "column": "prospect_salesrep_id"
+        }
+      },
+      {
+        "name": "taxZone",
+        "toOne": {
+          "type": "TaxZone",
+          "column": "prospect_taxzone_id"
+        }
+      },
+      {
+        "name": "site",
+        "attr": {
+          "type": "Number",
+          "column": "prospect_warehous_id"
+        }
+      }
+    ],
+    "extensions": [
+      {
+        "table": "crmacct",
+        "isChild": true,
+        "relations": [
+          {
+            "column": "crmacct_prospect_id",
+            "inverse": "id"
+          }
+        ],
+        "properties": [
+          {
+            "name": "isActive",
+            "attr": {
+              "type": "Boolean",
+              "column": "crmacct_active",
+              "required": true
+            }
+          }
+        ]
+      }
+    ],
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "ProspectRelation",
+    "table": "prospect",
+    "isRest": true,
+    "comment": "Prospect Relation Map",
+    "privileges": {
+      "all": {
+        "create": false,
+        "read": true,
+        "update": false,
+        "delete": false
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "prospect_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "number",
+        "attr": {
+          "type": "String",
+          "column": "prospect_number",
+          "isNaturalKey":true
+        }
+      },
+      {
+        "name": "name",
+        "attr": {
+          "type": "String",
+          "column": "prospect_name"
+        }
+      },
+      {
+        "name": "contact",
+        "toOne": {
+          "isNested": true,
+          "type": "ContactRelation",
+          "column": "prospect_cntct_id"
+        }
+      },
+      {
+        "name": "salesRep",
+        "toOne": {
+          "type": "SalesRep",
+          "column": "prospect_salesrep_id"
+        }
+      },
+      {
+        "name": "taxZone",
+        "toOne": {
+          "type": "TaxZone",
+          "column": "prospect_taxzone_id"
+        }
+      }
+    ],
+    "extensions": [
+      {
+        "table": "crmacct",
+        "isChild": true,
+        "relations": [
+          {
+            "column": "crmacct_prospect_id",
+            "inverse": "id"
+          }
+        ],
+        "properties": [
+          {
+            "name": "isActive",
+            "attr": {
+              "type": "Boolean",
+              "column": "crmacct_active"
+            }
+          }
+        ]
+      }
+    ],
+    "isSystem": true
+  }
+]

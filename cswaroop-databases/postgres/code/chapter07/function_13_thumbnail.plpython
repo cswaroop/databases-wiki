@@ -1,0 +1,30 @@
+CREATE FUNCTION save_image_with_thumbnail(image64 text)
+  RETURNS int 
+AS $$
+import Image, cStringIO
+size = (64,64) # thumbnail size
+
+# convert base64 encoded text to binary image data
+raw_image_data = image64.decode('base64')
+
+# create a pseudo-file to read image from
+infile = cStringIO.StringIO(raw_image_data)
+pil_img = Image.open(infile)
+pil_img.thumbnail(size, Image.ANTIALIAS)
+
+# create a stream to write the thumbnail to
+outfile = cStringIO.StringIO()
+pil_img.save(outfile, 'JPEG')
+raw_thumbnail = outfile.getvalue()
+
+# store result into database and return row id
+q = plpy.prepare('''
+  INSERT INTO photos(image, thumbnail)
+  VALUES ($1,$2)
+  RETURNING id''', ('bytea', 'bytea'))
+res = plpy.execute(q, (raw_image_data,raw_thumbnail))
+
+# return column id of first row
+return res[0]['id']
+$$ LANGUAGE plpythonu;
+

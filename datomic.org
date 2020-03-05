@@ -1,0 +1,82 @@
+https://docs.datomic.com/on-prem/index.html
+https://docs.datomic.com/cloud/index.html
+
+* Schema
+#+begin_src clojure
+#{
+:db/id                ;way to specify an id in literal data specification
+:db/ident             ;specifies an unique programmatic name for an entity/attr
+:db/cardinality
+:db/valueType
+:db/doc               ;documenation string
+:db.type/string       
+:db.type/bigdec
+:db.type/bigint
+:db.type/boolean
+:db.type/double
+:db.type/float
+:db.type/instant
+:db.type/keyword
+:db.type/long
+:db.type/ref
+:db.type/symbol
+:db.type/tuple
+:db.type/uuid
+:db.type/uri
+:db.cardinality/one
+:db.cardinality/many
+:db/unique
+:db.unique/identity
+:db.unique/value
+:db/isComponent
+:db/noHistory
+:db.attr/preds
+:db.entity/attrs
+:db.entity/preds
+:db.fn/retractEntity
+}
+
+(def sample-schema
+[{:db/ident :person/name
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/doc "Person full name"
+}])
+
+;; using a connection named conn:
+(d/transact conn {:tx-data name-schema})
+
+;; now you can transact names
+(d/transact conn {:tx-data [{:person/name "Grace Hopper"}]})
+
+;; another schema example
+[{:db/ident :student/first
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one}
+ {:db/ident :student/last
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one}
+ {:db/ident :student/email
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/unique :db.unique/identity}
+ {:db/ident :semester/year
+  :db/valueType :db.type/long
+  :db/cardinality :db.cardinality/one}
+ {:db/ident :semester/seasonnn
+  :db/valueType :db.type/keyword
+  :db/cardinality :db.cardinality/one}
+ {:db/ident :semester/year+season
+  :db/valueType :db.type/tuple
+  :db/tupleAttrs [:semester/year :semester/season]
+  :db/cardinality :db.cardinality/one
+  :db/unique :db.unique/identity}
+ {:db/ident :course/id
+  :db/valueType :db.type/string
+  :db/unique :db.unique/identity
+  :db/cardinality :db.cardinality/one}
+ {:db/ident :course/name
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one}]
+
+#+end_src

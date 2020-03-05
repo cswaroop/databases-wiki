@@ -1,0 +1,50 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="Consumer" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ait="http://dataorchestrator.fico.com/activityinput" xmlns:dat="http://dataorchestrator.fico.com/data" xmlns:aut="http://dataorchestrator.fico.com/authorization" xmlns:flw="http://dataorchestrator.fico.com/workflow" xmlns:wor="http://dataorchestrator.fico.com/workitem" xmlns:ws="http://ws.dataorchestrator.fico.com/" xmlns:res="http://dataorchestrator.fico.com/response">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<ws:getResponse>
+			<!--Zero or more repetitions:-->
+			<ait:ActivityInput Ref="1" xsi:type="ait:BureauActivityInput">
+				<InquiryParameter Name="ServiceCode" Value="S18"/>
+				<InquiryParameter Name="ProductId" Value="EuriscINC"/>
+				<InquiryParameter Name="UserId" Value="F0028001"/>
+				<InquiryParameter Name="Password" Value="Sr8b2RAs"/>
+				<InquiryParameter Name="ProductNamespace" Value="urn:crif-anagraficaunica-eurisc:2006-11-28"/>
+				<InquiryParameter Name="GroupId" Value="FICODEV"/>
+				<InquiryParameter Name="TransformNamespace" Value="urn:crif-messagegateway:2006-08-23"/>
+			</ait:ActivityInput>
+			<ait:ActivityInput Ref="2" xsi:type="ait:BureauActivityInput">
+				<ActivityRef Ref="1" InputName="CRIFConsumer"/>
+			</ait:ActivityInput>
+			<!--Zero or more repetitions:-->
+			<dat:Data xsi:type="ns1:Consumer" Ref="1" MessageId="2d7428a6-b58c-4dfdf008-8575-f03es123sw2fds6a12" FirstName="MARIO" ForceName="false" LastName="ROSSI" Gender="M" TaxCode="RSSMRA66R10A182Y" ForceTaxCode="false" BirthDate="1966-10-10" BirthPlace="ALESSANDRIA" BirthProvince="AL" Country="I" ForceTown="false" ApplicantType="R" RequestResidenceDetails="1" RequestMembershipDetails="1" RequestContractDetails="1" RequestAdditionalSubjectDetails="1" TaxCodeOrigin="1">
+				<Address StreetName="VIA FIORAVANTI" StreetNumber="18" Town="BOLOGNA" Province="BO" Zip="40100" Country="I" ForceStreet="false" ForceTown="false"/>
+				<Code FinanceContractCode="Finance1" TemporaryContractCode="Temp1" IdentificationCode="ID1"/>
+				<Identification Type="1" Number="123456" IssueDate="2005-01-01" IssuePlace="BOLOGNA" IssueProvince="BO" IssueCountry="I"/>
+				<OtherContact1 Type="TF" Value="0123456" Holder="MarcoRossi"/>
+				<Employment BusinessName="FICO" TaxCode="FICO0123456" ReaNumber="987123654" ChamberOfCommerceProvince="GB" VatNumber="564213789">
+					<Contact Type="TF" Value="987456321" Holder="FICO"/>
+					<Address StreetName="Main Street" StreetNumber="987" Zip="42564" Province="RO" Town="Roma" Country="I"/>
+				</Employment>
+				<Contract TypeOfCredit="R" NumberOfInstallments="12" CreditAmount="30000" PaymentFrequency="M" ChargeFrequency="" OverDraftUseLimit="" UseWithoutLimit="" PaymentMethod="" LoanRequestDate="2006-08-25" TypeOfOperation="PF" LoanRequestProvince="BO" OperationPhase="RC" Currency="E"/>
+			</dat:Data>
+			<!--Zero or more repetitions:-->
+			<flw:WorkFlow Ref="TestFlow">
+				<Activity xsi:type="flw:BureauActivity" Ref="1" ProviderName="CRIFConsumer" ParameterRef="1">
+					<Output Name="BureauRequest"/>
+					<Output Name="BureauResponse"/>
+					<Output Name="ReadableResponse"/>
+				</Activity>
+				<Activity xsi:type="flw:BureauActivity" Ref="Report" ProviderName="GMFItaly" ParameterRef="2">
+					<Output Name="CREDIT_WORTHINESS"/>
+					<Output Name="PARSED_BUREAU_DATA"/>
+					<Output Name="CREDIT_WORTHINESS_SUMMARY"/>
+					<Output Name="HISTORIC_SEARCHES"/>
+				</Activity>
+			</flw:WorkFlow>
+			<!--Zero or more repetitions:-->
+			<wor:WorkItem Ref="1" FlowRef="TestFlow">
+				<ItemData DataRef="1"/>
+			</wor:WorkItem>
+		</ws:getResponse>
+	</soapenv:Body>
+</soapenv:Envelope>

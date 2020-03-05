@@ -1,0 +1,370 @@
+[
+  {
+    "context":"xtuple",
+    "nameSpace": "XM",
+    "type": "OrderRelation",
+    "table": "xt.ordhead",
+    "isRest": true,
+    "comment": "Order Relation Map",
+    "privileges": {
+      "all": {
+        "create": false,
+        "read": true,
+        "update": false,
+        "delete": false
+      }
+    },
+    "properties": [
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "number",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_number"
+        }
+      },
+      {
+        "name": "orderType",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_type"
+        }
+      },
+      {
+        "name": "custNumber",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_srcnumber"
+        }
+      },
+      {
+        "name": "custName",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_srcname"
+        }
+      },
+      {
+        "name": "shipToName",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_shiptoname"
+        }
+      },
+      {
+        "name": "shipToAddress1",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_shiptoaddress1"
+        }
+      },
+      {
+        "name": "shipToAddress2",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_shiptoaddress2"
+        }
+      },
+      {
+        "name": "shipToAddress3",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_shiptoaddress3"
+        }
+      },
+      {
+        "name": "shipToCity",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_shiptocity"
+        }
+      },
+      {
+        "name": "shipToState",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_shiptostate"
+        }
+      },
+      {
+        "name": "shipToPostalCode",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_shiptopostalcode"
+        }
+      },
+      {
+        "name": "shipVia",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_shipvia"
+        }
+      },
+      {
+        "name": "status",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_status"
+        }
+      },
+      {
+        "name": "canReceive",
+        "attr": {
+          "type": "Boolean",
+          "column": "can_receive"
+        }
+      },
+      {
+        "name": "holdType",
+        "attr": {
+          "type": "String",
+          "column": "holdtype"
+        }
+      }
+    ],
+    "isSystem": true
+  },
+  {
+    "context":"xtuple",
+    "nameSpace": "XM",
+    "type": "OrderListItem",
+    "table": "xt.ordhead",
+    "isRest": true,
+    "comment": "Order List Item Map",
+    "privileges": {
+      "all": {
+        "create": false,
+        "read": true,
+        "update": false,
+        "delete": false
+      }
+    },
+    "properties": [
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "number",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_number"
+        }
+      },
+      {
+        "name": "orderType",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_type"
+        }
+      },
+      {
+        "name": "status",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_status"
+         }
+      },
+      {
+        "name": "scheduleDate",
+        "attr": {
+          "type": "Date",
+          "column": "schedule_date"
+        }
+      },
+      {
+        "name": "orderDate",
+        "attr": {
+          "type": "Date",
+          "column": "ordhead_orderdate"
+         }
+      },
+      {
+        "name": "sourceName",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_srcname"
+        }
+      },
+      {
+        "name": "shiptoName",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_shiptoname"
+        }
+      },
+      {
+        "name": "shiptoCity",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_shiptocity"
+        }
+      },
+      {
+        "name": "shiptoState",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_shiptostate"
+        }
+      },
+      {
+        "name": "shiptoCountry",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_shiptocountry"
+        }
+      },
+      {
+        "name": "orderNotes",
+        "attr": {
+          "type": "String",
+          "column": "ordhead_ordercomments"
+         }
+      },
+      {
+        "name": "canReceive",
+        "attr": {
+          "type": "Boolean",
+          "column": "can_receive"
+        }
+      },
+      {
+        "name": "holdType",
+        "attr": {
+          "type": "String",
+          "column": "holdtype"
+        }
+      }
+    ],
+    "isSystem": true
+  },
+  {
+    "context":"xtuple",
+    "nameSpace": "XM",
+    "type": "OrderLine",
+    "table": "xt.orditem",
+    "comment": "Order Line Item Map",
+    "privileges": {
+        "all": {
+        "create": false,
+        "read": true,
+        "update": false,
+        "delete": false
+      }
+    },
+    "properties": [
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "order",
+        "attr": {
+          "type": "String",
+          "column": "orditem_ordhead_uuid"
+        }
+      },
+      {
+        "name": "lineNumber",
+        "attr": {
+          "type": "Number",
+          "column": "orditem_linenumber"
+        }
+      },
+      {
+        "name": "subnumber",
+        "attr": {
+          "type": "Number",
+          "column": "orditem_subnumber"
+        }
+      },
+      {
+        "name": "item",
+        "toOne": {
+          "isNested": true,
+          "type": "ItemRelation",
+          "column": "orditem_item_id",
+          "required": true
+        }
+      },
+      {
+        "name": "site",
+        "toOne": {
+          "isNested": true,
+          "type": "SiteRelation",
+          "column": "orditem_warehous_id",
+          "required": true
+        }
+      },
+      {
+        "name": "quantity",
+        "attr": {
+          "type": "Quantity",
+          "column": "orditem_qtyord",
+          "required": true
+        }
+      },
+      {
+        "name": "quantityUnit",
+        "toOne": {
+          "type": "Unit",
+          "column": "orditem_qty_uom_id",
+          "required": true
+        }
+      },
+      {
+        "name": "scheduleDate",
+        "attr": {
+          "type": "Date",
+          "column": "orditem_scheddate",
+          "required": true
+        }
+      },
+      {
+        "name": "transacted",
+        "attr": {
+          "type": "Quantity",
+          "column": "orditem_qtytransacted"
+        }
+      },
+      {
+        "name": "returned",
+        "attr": {
+          "type": "Quantity",
+          "column": "orditem_qtyreturned"
+        }
+      },
+      {
+        "name": "balance",
+        "attr": {
+          "type": "Quantity",
+          "column": "transacted_balance"
+        }
+      },
+      {
+        "name": "atShipping",
+        "attr": {
+          "type": "Number",
+          "column": "at_dock"
+        }
+      }
+    ],
+    "isSystem": true,
+    "isNestedOnly": true
+  }
+]

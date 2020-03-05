@@ -1,0 +1,402 @@
+/*
+  To compile this .less file to .css:
+  lessc screen.less > ../stylesheets/screen.css
+  Use -compress for a compressed .css with no comments
+*/
+
+// Colors
+@highlight: #d6f1ff;
+@orange: #f60;
+@bright-orange: #ff6529;
+@sky-blue: #9Cf;
+@light-blue: #35a8ee;
+@blue: #0000ff;
+@slate-blue: #357ec7;
+@dark-slate-blue: #1a4f77;
+@lightest-gray: #efefef;
+@button-gray: #e1e1e1;
+@earl-grey: #f3f3f3;
+@silver: #aaa;
+@smoke: #d7d7d7;
+@gray: #d8d8d8;
+@med-gray: #939393;
+@charcoal: #666;
+@header-gray: #505050;
+@dim-gray: #777;
+@dark-gray: #373737;
+@blue-gray: #93a1a1;
+@near-black: #0e0e0e;
+@black: #070707;
+@white: #fdfdfd;
+@ghost: #f8f8f8;
+@red: #c51616;
+@bright-red: #ff0000;
+@green: #009000;
+@light-orange: #ff9c00;
+@item-hilite-background: #226b9a;
+
+@text-shadow: fade(#222, 45%);
+
+// For calendar popup
+@control-bg: @header-gray;
+
+// Fonts
+// ------
+@baseFont: 'Helvetica Neue', Helvetica, 'Nimbus Sans L', Arial, sans-serif;
+@groupboxFont: "Lucida Sans Unicode", "Lucida Grande", arial, sans-serif;
+@startupFont: Segoe UI, Prelude Medium, Helvetica, Verdana, sans-serif;
+@baseFontSize: 100%;
+@panelsFontSize: 5em;
+@iconFontSize: 60%;
+@totalsFontSize: 14px;
+@buttonFontSize: 20px;
+@buttonTextFontSize: 17px;
+
+// sizing
+@defaultPanelWidth: 320px;
+@toolbarHeight: 55px;
+@searchLength: 185px;
+@mobileLength: 100px;
+// popups
+@maxMessageHeight: 500px;
+@maxMessageWidth: 500px;
+
+// libs
+@import "../../lib/Font-Awesome/less/font-awesome.less";
+@import "../../lib/font-onyx/lib/Icon.less";
+
+body {
+  font-family: @baseFont;
+  font-size: @baseFontSize;
+  background-color: @white;
+}
+
+.enyo-fit {
+  bottom: 4px !important;
+}
+
+.disabled {
+  opacity: 0.8;
+  cursor: default;
+}
+
+a, .hyperlink {
+  color: @slate-blue;
+  cursor: pointer;
+}
+
+.xv-invisible-wrapper {
+  padding: 0;
+  border: none;
+}
+
+  // This gives them 4 lines of description
+.xv-limit-description {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+}
+
+.xv-app-panel {
+  /* Setting this as min-width overrides enyo-narrow 100% */
+  width: @defaultPanelWidth;
+  // TODO: replace with textured background?
+  background-color: @white;
+  .box-shadow(-2px -2px 6px rgba(0,0,0,0.20));
+}
+
+/*
+  Media query for responsive design. This adapts to smaller
+  displays.
+*/
+@media (max-width: 480px) {
+  .pullout-menu {
+    display: block;
+    margin: 0;
+  }
+  .xv-app-panel > * {
+    min-width: 100%;
+    max-width: 100%;
+  }
+  .enyo-fit {
+    margin-bottom: -4px !important;
+  }
+}
+
+.wide > * {
+  min-width: 50%;
+}
+
+.scroll-ios {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.wide > * {
+  min-width: 50%;
+}
+
+.xv-version-label {
+  padding: 10px;
+}
+
+.xv-popup-button {
+  margin: 4px;
+}
+
+.xv-error, .xv-negative {
+  color: @bright-red;
+}
+
+/**
+  Default button bar with margins and border-radius
+*/
+.xv-buttons {
+  margin: 5px;
+  &.center {
+    text-align: center;
+  }
+
+  .onyx-button {
+    margin: 2px;
+    min-height: 40px;
+    min-width: 60px;
+    background: @button-gray;
+    color: @charcoal;
+    font-size: @buttonFontSize;
+
+    &[class^="icon-"]:before, &[class*=" icon-"]:before {
+      vertical-align: middle;
+      margin-right: 5px;
+    }
+    &.text {
+      font-size: @buttonTextFontSize;
+    }
+    &.selected {
+      background: @slate-blue;
+      color: @white;
+    }
+  }
+}
+
+.xv-assignment-box {
+  .xv-flexible-label {
+    width: 85%;
+  }
+  .xv-label {
+    width: 250px;
+  }
+}
+
+.xv-parameter-title {
+  padding-top: 8px;
+  font-size: large;
+  text-align: center;
+}
+
+/**
+  Default popup style
+*/
+.xv-popup {
+  background: @header-gray;
+  min-width: @defaultPanelWidth;
+  padding: 10px;
+  text-align: center;
+
+  .message {
+    margin-bottom: 10px;
+    max-height: @maxMessageHeight;
+    max-width: @maxMessageWidth;
+  }
+
+  &.xv-groupbox-popup {
+    .xv-workspace-container > .xv-workspace > .xv-workspace-panel;
+    color: @black;
+    padding: 7px;
+
+    .xv-message {
+      color: @red;
+      padding: 5px;
+    }
+  }
+}
+
+.xv-my-account-popup {
+  background-color: @white;
+  color: #000;
+  .xv-message {
+    color:red;
+    padding: 5px;
+  }
+  .onyx-button {
+    margin: 0 auto 0 auto;
+  }
+  .onyx-input {
+    padding-left: 10px;
+    float: right;
+  }
+}
+
+.xv-sort-popup {
+  background-color: @white;
+  color: @black;
+  .xv-groupbox > *:last-child {
+    text-align: center;
+    padding: 5px;
+    .onyx-button {
+      margin: 3px;
+    }
+  }
+}
+
+.xv-comment-box {
+  .xv-comment-box-repeater {
+    background: @white;
+  }
+  .xv-comment-box-label {
+    padding: 5px;
+    font-size: small;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .xv-comment-box-textblock {
+    font-size: small;
+    &.disabled {
+      color: @dim-gray;
+    }
+  }
+  /* Resets the margin/padding value for blockquote tag in comments */
+  blockquote {
+    margin: 0 15px 10px 15px;
+    padding: 0;
+  }
+}
+
+.icon-folder-open-alt, .icon-calendar, .icon-sort, .icon-angle-up, .icon-angle-down {
+  color: @slate-blue;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.xv-short-textarea {
+  .xv-textarea-input {
+    min-height: 0;
+  }
+}
+.xv-textarea-input {
+  width: 90%;
+  min-height: 100px;
+  margin: 6px;
+  border: #eee 2px solid;
+}
+
+.xv-documents-picker-label {
+  width: 85px;
+  padding: 16px 8px 8px 8px;
+  text-align: right;
+}
+
+.xv-documents-picker {
+  width: 120px;
+  margin: 6px;
+}
+
+.xv-half-check {
+  // TODO: replace this image with font
+  background:
+    transparent
+    url(../../../../../../assets/checkbox.png)
+    no-repeat
+    0 -96px
+    scroll;
+}
+
+.xv-menuitem {
+  &.disabled {
+    color: @dim-gray;
+  }
+}
+
+/* This is for styling the moved items in the more toolbar */
+.xv-toolbar-moved {
+  width: 220px;
+}
+
+.icon-folder-open-alt, .icon-calendar, .icon-sort, .icon-angle-up, .icon-angle-down, .icon-save {
+  color: @slate-blue;
+  vertical-align: middle;
+}
+
+.onyx-toolbar {
+  height: @toolbarHeight;
+  padding: 4px;
+  background: @header-gray;
+  border: none;
+
+  .onyx-icon-button, .onyx-popup-decorator {
+    margin: 0 5px 0 3px;
+    @media (max-width: 480px) {
+      margin: 0 7px 0 5px;
+    }
+    div {
+      text-shadow: none;
+      color: @white;
+    }
+    &.lock {
+      div {
+        color: @light-orange;
+      }
+    }
+  }
+
+  .onyx-popup-decorator {
+    // cancel the margin that
+    // is on the icon if there's a menu
+    .onyx-icon-button {
+      margin: 0;
+    }
+    text-align: center;
+    width: 50px;
+    height: 40px;
+  }
+
+  .onyx-menu {
+    margin-top: 10px;
+  }
+
+  .spacer {
+    margin: 0;
+  }
+
+  .xv-toolbar-label, .xv-search {
+    width: @searchLength;
+    margin: 0;
+    margin-left: 6px;
+    @media (max-width: 480px) {
+      width: @mobileLength;
+      font-size: 18px;
+    }
+  }
+  .xv-search {
+    color: @med-gray;
+  }
+}
+
+// local imports
+@import "mixins.less";
+
+@import "navigator.less";
+@import "startup.less";
+@import "workspace.less";
+@import "model-decorator.less";
+@import "picker.less";
+@import "grid.less";
+@import "dashboard.less";
+@import "list.less";
+@import "pullout.less";
+@import "relations.less";
+@import "address.less";
+@import "search.less";

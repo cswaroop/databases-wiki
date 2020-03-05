@@ -1,0 +1,1729 @@
+[
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "SalesOrder",
+    "table": "xt.coheadinfo",
+    "isRest": true,
+    "lockable": true,
+    "lockTable": "cohead",
+    "idSequenceName": "cohead_cohead_id_seq",
+    "orderSequence": "SoNumber",
+    "comment": "Sales Order Map",
+    "privileges": {
+      "all": {
+        "create": "MaintainSalesOrders",
+        "read": "ViewSalesOrders",
+        "update": "MaintainSalesOrders",
+        "delete": "MaintainSalesOrders"
+      },
+      "attribute": {
+        "margin": {
+          "view": "ShowMarginsOnSalesOrder"
+        },
+        "orderDate": {
+          "create": "OverrideSODate",
+          "update": "OverrideSODate"
+        },
+        "packDate": {
+          "create": "AlterPackDate",
+          "update": "AlterPackDate"
+        }
+      },
+      "personal": {
+        "create": false,
+        "read": "ViewPersonalCRMAccounts",
+        "update": false,
+        "delete": false,
+        "properties": [
+          "crmaccountUsers"
+        ]
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "cohead_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "number",
+        "attr": {
+          "type": "String",
+          "column": "cohead_number",
+          "isNaturalKey":true,
+          "required": true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid"
+        }
+      },
+      {
+        "name": "customer",
+        "toOne": {
+          "isNested": true,
+          "type": "SalesCustomer",
+          "column": "cohead_cust_id",
+          "required": true
+        }
+      },
+      {
+        "name": "customerPurchaseOrderNumber",
+        "attr": {
+          "type": "String",
+          "column": "cohead_custponumber"
+         }
+      },
+      {
+        "name": "orderDate",
+        "attr": {
+          "type": "Date",
+          "column": "cohead_orderdate",
+          "required": true
+        }
+      },
+      {
+        "name": "packDate",
+        "attr": {
+          "type": "Date",
+          "column": "cohead_packdate"
+        }
+      },
+      {
+        "name": "scheduleDate",
+        "attr": {
+          "type": "DueDate",
+          "column": "schedule_date"
+        }
+      },
+      {
+        "name": "terms",
+        "toOne": {
+          "type": "Terms",
+          "column": "cohead_terms_id",
+          "required": true
+        }
+      },
+      {
+        "name": "salesRep",
+        "toOne": {
+          "type": "SalesRep",
+          "column": "cohead_salesrep_id",
+          "required": true
+        }
+      },
+      {
+        "name": "commission",
+        "attr": {
+          "type": "Percent",
+          "column": "cohead_commission"
+        }
+      },
+      {
+        "name": "taxZone",
+        "toOne": {
+          "type": "TaxZone",
+          "column": "cohead_taxzone_id"
+        }
+      },
+      {
+        "name": "site",
+        "toOne": {
+          "type": "Site",
+          "column": "cohead_warehous_id"
+        }
+      },
+      {
+        "name": "saleType",
+        "toOne": {
+          "type": "SaleType",
+          "column": "cohead_saletype_id"
+        }
+      },
+      {
+        "name": "status",
+        "attr": {
+          "type": "String",
+          "column": "cohead_status"
+        }
+      },
+      {
+        "name": "billtoName",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billtoname"
+        }
+      },
+      {
+        "name": "billtoAddress1",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billtoaddress1"
+        }
+      },
+      {
+        "name": "billtoAddress2",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billtoaddress2"
+        }
+      },
+      {
+        "name": "billtoAddress3",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billtoaddress3"
+        }
+      },
+      {
+        "name": "billtoCity",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billtocity"
+        }
+      },
+      {
+        "name": "billtoState",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billtostate"
+        }
+      },
+      {
+        "name": "billtoCountry",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billtocountry"
+        }
+      },
+      {
+        "name": "billtoPostalCode",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billtozipcode"
+        }
+      },
+      {
+        "name": "billtoContact",
+        "toOne": {
+          "isNested": true,
+          "type": "ContactRelation",
+          "column": "cohead_billto_cntct_id"
+        }
+      },
+      {
+        "name": "billtoContactHonorific",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billto_cntct_honorific"
+        }
+      },
+      {
+        "name": "billtoContactFirstName",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billto_cntct_first_name"
+        }
+      },
+      {
+        "name": "billtoContactMiddleName",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billto_cntct_middle"
+        }
+      },
+      {
+        "name": "billtoContactLastName",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billto_cntct_last_name"
+        }
+      },
+      {
+        "name": "billtoContactSuffix",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billto_cntct_suffix"
+        }
+      },
+      {
+        "name": "billtoContactPhone",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billto_cntct_phone"
+        }
+      },
+      {
+        "name": "billtoContactTitle",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billto_cntct_title"
+        }
+      },
+      {
+        "name": "billtoContactFax",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billto_cntct_fax"
+        }
+      },
+      {
+        "name": "billtoContactEmail",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billto_cntct_email"
+        }
+      },
+      {
+        "name": "shipto",
+        "toOne": {
+          "isNested": true,
+          "type": "CustomerShiptoRelation",
+          "column": "cohead_shipto_id"
+        }
+      },
+      {
+        "name": "shiptoName",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shiptoname"
+        }
+      },
+      {
+        "name": "shiptoAddress1",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shiptoaddress1"
+        }
+      },
+      {
+        "name": "shiptoAddress2",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shiptoaddress2"
+        }
+      },
+      {
+        "name": "shiptoAddress3",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shiptoaddress3"
+        }
+      },
+      {
+        "name": "shiptoCity",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shiptocity"
+        }
+      },
+      {
+        "name": "shiptoState",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shiptostate"
+        }
+      },
+      {
+        "name": "shiptoCountry",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shiptocountry"
+        }
+      },
+      {
+        "name": "shiptoPostalCode",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shiptozipcode"
+        }
+      },
+      {
+        "name": "shiptoContact",
+        "toOne": {
+          "isNested": true,
+          "type": "ContactRelation",
+          "column": "cohead_shipto_cntct_id"
+        }
+      },
+      {
+        "name": "shiptoContactHonorific",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shipto_cntct_honorific"
+        }
+      },
+      {
+        "name": "shiptoContactFirstName",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shipto_cntct_first_name"
+        }
+      },
+      {
+        "name": "shiptoContactMiddleName",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shipto_cntct_middle"
+        }
+      },
+      {
+        "name": "shiptoContactLastName",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shipto_cntct_last_name"
+        }
+      },
+      {
+        "name": "shiptoContactSuffix",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shipto_cntct_suffix"
+        }
+      },
+      {
+        "name": "shiptoContactPhone",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shipto_cntct_phone"
+        }
+      },
+      {
+        "name": "shiptoContactTitle",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shipto_cntct_title"
+        }
+      },
+      {
+        "name": "shiptoContactFax",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shipto_cntct_fax"
+        }
+      },
+      {
+        "name": "shiptoContactEmail",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shipto_cntct_email"
+        }
+      },
+      {
+        "name": "orderNotes",
+        "attr": {
+          "type": "String",
+          "column": "cohead_ordercomments"
+        }
+      },
+      {
+        "name": "shipNotes",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shipcomments"
+        }
+      },
+      {
+        "name": "fob",
+        "attr": {
+          "type": "String",
+          "column": "cohead_fob"
+        }
+      },
+      {
+        "name": "shipVia",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shipvia"
+        }
+      },
+      {
+        "name": "currency",
+        "toOne": {
+          "type": "Currency",
+          "column": "cohead_curr_id",
+          "required": true,
+          "isNested": true
+        }
+      },
+      {
+        "name": "calculateFreight",
+        "attr": {
+          "type": "Boolean",
+          "column": "cohead_calcfreight",
+          "required": true
+        }
+      },
+      {
+        "name": "shipZone",
+        "toOne": {
+          "type": "ShipZone",
+          "column": "cohead_shipzone_id"
+        }
+      },
+      {
+        "name": "shipCharge",
+        "toOne": {
+          "type": "ShipCharge",
+          "column": "cohead_shipchrg_id"
+        }
+      },
+      {
+        "name": "holdType",
+        "attr": {
+          "type": "String",
+          "column": "cohead_holdtype"
+        }
+      },
+      {
+        "name": "wasQuote",
+        "attr": {
+          "type": "Boolean",
+          "column": "cohead_wasquote",
+          "required": true
+        }
+      },
+      {
+        "name": "imported",
+        "attr": {
+          "type": "Boolean",
+          "column": "cohead_imported"
+        }
+      },
+      {
+        "name": "shipComplete",
+        "attr": {
+          "type": "Boolean",
+          "column": "cohead_shipcomplete"
+        }
+      },
+      {
+        "name": "quoteNumber",
+        "attr": {
+          "type": "String",
+          "column": "cohead_quote_number"
+        }
+      },
+      {
+        "name": "allocatedCredit",
+        "attr": {
+          "type": "Number",
+          "column": "allocated_credit"
+        }
+      },
+      {
+        "name": "authorizedCredit",
+        "attr": {
+          "type": "Number",
+          "column": "authorized_credit"
+        }
+      },
+      {
+        "name": "outstandingCredit",
+        "attr": {
+          "type": "Number",
+          "column": "outstanding_credit"
+        }
+      },
+      {
+        "name": "balance",
+        "attr": {
+          "type": "Number",
+          "column": "balance"
+        }
+      },
+      {
+        "name": "margin",
+        "attr": {
+          "type": "Percent",
+          "column": "margin"
+        }
+      },
+      {
+        "name": "freightWeight",
+        "attr": {
+          "type": "Number",
+          "column": "freight_weight"
+        }
+      },
+      {
+        "name": "subtotal",
+        "attr": {
+          "type": "Number",
+          "column": "subtotal"
+        }
+      },
+      {
+        "name": "taxTotal",
+        "attr": {
+          "type": "Number",
+          "column": "tax_total"
+        }
+      },
+      {
+        "name": "miscCharge",
+        "attr": {
+          "type": "Number",
+          "column": "cohead_misc"
+        }
+      },
+      {
+        "name": "freight",
+        "attr": {
+          "type": "Number",
+          "column": "cohead_freight"
+        }
+      },
+      {
+        "name": "total",
+        "attr": {
+          "type": "Number",
+          "column": "total"
+        }
+      },
+      {
+        "name": "lineItems",
+        "toMany": {
+          "isNested": true,
+          "type": "SalesOrderLine",
+          "column": "cohead_id",
+          "inverse": "salesOrder"
+        }
+      },
+      {
+        "name": "comments",
+        "toMany": {
+          "isNested": true,
+          "type": "SalesOrderComment",
+          "column": "cohead_id",
+          "inverse": "source"
+        }
+      },
+      {
+        "name": "workflow",
+        "toMany": {
+          "isNested": true,
+          "type": "SalesOrderWorkflow",
+          "column": "obj_uuid",
+          "inverse": "parent"
+        }
+      },
+      {
+        "name": "characteristics",
+        "toMany": {
+          "type": "SalesOrderCharacteristic",
+          "column": "cohead_id",
+          "inverse": "salesOrder",
+          "isNested": true
+        }
+      },
+      {
+        "name": "documents",
+        "toMany": {
+          "type": "DocumentAssociation",
+          "column": "cohead_id",
+          "inverse": "source",
+          "sourceType": "S",
+          "isNested": true
+        }
+      },
+      {
+        "name": "crmaccountUsers",
+        "toMany": {
+          "type": "ShareUsers",
+          "column": "obj_uuid",
+          "inverse": "uuid"
+        }
+      }
+    ],
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "SalesOrderWorkflow",
+    "table": "xt.coheadwf",
+    "comment": "Sales Order Workflow Map",
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "wf_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "parent",
+        "attr": {
+          "type": "String",
+          "column": "wf_parent_uuid"
+        }
+      },
+      {
+        "name": "name",
+        "attr": {
+          "type": "String",
+          "column": "wf_name",
+          "required": true
+        }
+      },
+      {
+        "name": "description",
+        "attr": {
+          "type": "String",
+          "column": "wf_description"
+        }
+      },
+      {
+        "name": "workflowType",
+        "attr": {
+          "type": "String",
+          "column": "wf_type"
+        }
+      },
+      {
+        "name": "status",
+        "attr": {
+          "type": "String",
+          "column": "wf_status"
+        }
+      },
+      {
+        "name": "startDate",
+        "attr": {
+          "type": "Date",
+          "column": "wf_start_date"
+        }
+      },
+      {
+        "name": "dueDate",
+        "attr": {
+          "type": "DueDate",
+          "column": "wf_due_date"
+        }
+      },
+      {
+        "name": "assignDate",
+        "attr": {
+          "type": "Date",
+          "column": "wf_assigned_date"
+        }
+      },
+      {
+        "name": "completeDate",
+        "attr": {
+          "type": "Date",
+          "column": "wf_completed_date"
+        }
+      },
+      {
+        "name": "notes",
+        "attr": {
+          "type": "String",
+          "column": "wf_notes"
+        }
+      },
+      {
+        "name": "priority",
+        "toOne": {
+          "type": "Priority",
+          "column": "wf_priority_id",
+          "required": true
+        }
+      },
+      {
+        "name": "sequence",
+        "attr": {
+          "type": "Number",
+          "column": "wf_sequence"
+        }
+      },
+      {
+        "name": "owner",
+        "toOne": {
+          "isNested": true,
+          "type": "UserAccountRelation",
+          "column": "wf_owner_username",
+          "inverse": "username"
+        }
+      },
+      {
+        "name": "assignedTo",
+        "toOne": {
+          "isNested": true,
+          "type": "UserAccountRelation",
+          "column": "wf_assigned_username",
+          "inverse": "username"
+        }
+      },
+      {
+        "name": "completedParentStatus",
+        "attr": {
+          "type": "String",
+          "column": "wf_completed_parent_status"
+        }
+      },
+      {
+        "name": "deferredParentStatus",
+        "attr": {
+          "type": "String",
+          "column": "wf_deferred_parent_status"
+        }
+      },
+      {
+        "name": "completedSuccessors",
+        "attr": {
+          "type": "String",
+          "column": "wf_completed_successors"
+        }
+      },
+      {
+        "name": "deferredSuccessors",
+        "attr": {
+          "type": "String",
+          "column": "wf_deferred_successors"
+        }
+      }
+    ],
+    "isNestedOnly": true,
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "SalesOrderComment",
+    "table": "comment",
+    "idSequenceName": "comment_comment_id_seq",
+    "comment": "Sales Order Comment Map",
+    "privileges": {
+      "all": {
+        "create": true,
+        "read": true,
+        "update": "EditOthersComments",
+        "delete": false
+      },
+      "personal": {
+        "update": "EditOwnComments",
+        "properties": [
+          "createdBy"
+        ]
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "comment_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "sourceType",
+        "attr": {
+          "type": "String",
+          "column": "comment_source",
+          "value": "S"
+        }
+      },
+      {
+        "name": "source",
+        "attr": {
+          "type": "Number",
+          "column": "comment_source_id"
+        }
+      },
+      {
+        "name": "commentType",
+        "toOne": {
+          "type": "CommentType",
+          "column": "comment_cmnttype_id",
+          "required": true
+        }
+      },
+      {
+        "name": "text",
+        "attr": {
+          "type": "String",
+          "column": "comment_text"
+        }
+      },
+      {
+        "name": "isPublic",
+        "attr": {
+          "type": "Boolean",
+          "column": "comment_public",
+          "value": true
+        }
+      },
+      {
+        "name": "created",
+        "attr": {
+          "type": "Date",
+          "column": "comment_date"
+        }
+      },
+      {
+        "name": "createdBy",
+        "attr": {
+          "type": "String",
+          "column": "comment_user"
+        }
+      }
+    ],
+    "isNestedOnly": true,
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "SalesOrderLine",
+    "table": "xt.coiteminfo",
+    "idSequenceName": "coitem_coitem_id_seq",
+    "comment": "Sales Order Line Item Map",
+    "privileges": {
+      "all": {
+        "create": "MaintainSalesOrders",
+        "read": "ViewSalesOrders",
+        "update": "MaintainSalesOrders",
+        "delete": "MaintainSalesOrders"
+      },
+      "attribute": {
+        "firm": {
+          "create": "FirmSalesOrder",
+          "update": "FirmSalesOrder"
+        },
+        "margin": {
+          "view": "ShowMarginsOnSalesOrder"
+        },
+        "unitCost": {
+          "view": "ViewCosts"
+        },
+        "taxType": {
+          "create": "OverrideTax",
+          "update": "OverrideTax"
+        },
+        "markup": {
+          "view": "ViewCosts"
+        }
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "coitem_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "salesOrder",
+        "attr": {
+          "type": "Number",
+          "column": "coitem_cohead_id",
+          "required": true
+        }
+      },
+      {
+        "name": "lineNumber",
+        "attr": {
+          "type": "Number",
+          "column": "coitem_linenumber",
+          "required": true
+        }
+      },
+      {
+        "name": "subNumber",
+        "attr": {
+          "type": "Number",
+          "column": "coitem_subnumber",
+          "required": true
+        }
+      },
+      {
+        "name": "item",
+        "toOne": {
+          "required": true,
+          "isNested": true,
+          "type": "ItemRelation",
+          "column": "coitem_item_id"
+        }
+      },
+      {
+        "name": "site",
+        "toOne": {
+          "isNested": true,
+          "type": "SiteRelation",
+          "column": "coitem_warehous_id",
+          "required": true
+        }
+      },
+      {
+        "name": "unitCost",
+        "attr": {
+          "type": "Cost",
+          "column": "coitem_unitcost"
+        }
+      },
+      {
+        "name": "quantity",
+        "attr": {
+          "type": "Quantity",
+          "column": "coitem_qtyord",
+          "required": true
+        }
+      },
+      {
+        "name": "quantityUnit",
+        "toOne": {
+          "type": "Unit",
+          "column": "coitem_qty_uom_id",
+          "required": true
+        }
+      },
+      {
+        "name": "quantityUnitRatio",
+        "attr": {
+          "type": "UnitRatio",
+          "column": "coitem_qty_invuomratio",
+          "required": true
+        }
+      },
+      {
+        "name": "basePrice",
+        "attr": {
+          "type": "SalesPrice",
+          "column": "base_price"
+        }
+      },
+      {
+        "name": "customerPrice",
+        "attr": {
+          "type": "SalesPrice",
+          "column": "coitem_custprice",
+          "required": true
+        }
+      },
+      {
+        "name": "discount",
+        "attr": {
+          "type": "Percent",
+          "column": "cust_discount"
+        }
+      },
+      {
+        "name": "price",
+        "attr": {
+          "type": "SalesPrice",
+          "column": "coitem_price",
+          "required": true
+        }
+      },
+      {
+        "name": "scheduleDate",
+        "attr": {
+          "type": "DueDate",
+          "column": "coitem_scheddate",
+          "required": true
+        }
+      },
+      {
+        "name": "promiseDate",
+        "attr": {
+          "type": "Date",
+          "column": "coitem_promdate"
+        }
+      },
+      {
+        "name": "markup",
+        "attr": {
+          "type": "Percent",
+          "column": "markup"
+        }
+      },
+      {
+        "name": "listPrice",
+        "attr": {
+          "type": "Money",
+          "column": "list_price"
+        }
+      },
+      {
+        "name": "listPriceDiscount",
+        "attr": {
+          "type": "Percent",
+          "column": "list_price_discount"
+        }
+      },
+      {
+        "name": "customerPartNumber",
+        "attr": {
+          "type": "String",
+          "column": "coitem_custpn"
+        }
+      },
+      {
+        "name": "priceUnit",
+        "toOne": {
+          "type": "Unit",
+          "column": "coitem_price_uom_id",
+          "required": true
+        }
+      },
+      {
+        "name": "priceUnitRatio",
+        "attr": {
+          "type": "UnitRatio",
+          "column": "coitem_price_invuomratio",
+          "required": true
+        }
+      },
+      {
+        "name": "extendedPrice",
+        "attr": {
+          "type": "ExtendedPrice",
+          "column": "ext_price"
+        }
+      },
+      {
+        "name": "margin",
+        "attr": {
+          "type": "Percent",
+          "column": "margin"
+        }
+      },
+      {
+        "name": "taxType",
+        "toOne": {
+          "type": "TaxType",
+          "column": "coitem_taxtype_id"
+        }
+      },
+      {
+        "name": "tax",
+        "attr": {
+          "type": "Number",
+          "column": "tax"
+        }
+      },
+      {
+        "name": "status",
+        "attr": {
+          "type": "String",
+          "column": "coitem_status"
+        }
+      },
+      {
+        "name": "substituteItem",
+        "toOne": {
+          "type": "Item",
+          "column": "coitem_substitute_item_id"
+        }
+      },
+      {
+        "name": "firm",
+        "attr": {
+          "type": "Boolean",
+          "column": "coitem_firm",
+          "required": true
+        }
+      },
+      {
+        "name": "notes",
+        "attr": {
+          "type": "String",
+          "column": "coitem_memo"
+        }
+      },
+      {
+        "name": "comments",
+        "toMany": {
+          "type": "SalesOrderLineComment",
+          "column": "coitem_id",
+          "inverse": "salesOrderLine",
+          "isNested": true
+        }
+      },
+      {
+        "name": "characteristics",
+        "toMany": {
+          "type": "SalesOrderLineCharacteristic",
+          "column": "coitem_id",
+          "inverse": "salesOrderLine",
+          "isNested": true
+        }
+      }
+    ],
+    "isSystem": true,
+    "isNestedOnly": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "SalesOrderCharacteristic",
+    "table": "charass",
+    "idSequenceName": "charass_charass_id_seq",
+    "comment": "Sales Order Characteristic Map",
+    "privileges": {
+      "all": {
+        "create": true,
+        "read": true,
+        "update": true,
+        "delete": true
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "charass_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "targetType",
+        "attr": {
+          "type": "String",
+          "column": "charass_target_type",
+          "value": "S"
+        }
+      },
+      {
+        "name": "salesOrder",
+        "attr": {
+          "type": "Number",
+          "column": "charass_target_id"
+        }
+      },
+      {
+        "name": "characteristic",
+        "toOne": {
+          "type": "Characteristic",
+          "column": "charass_char_id",
+          "required": true
+        }
+      },
+      {
+        "name": "value",
+        "attr": {
+          "type": "String",
+          "column": "charass_value"
+        }
+      }
+    ],
+    "isNestedOnly": true,
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "SalesOrderLineCharacteristic",
+    "table": "charass",
+    "idSequenceName": "charass_charass_id_seq",
+    "comment": "Sales Order Line Characteristic Map",
+    "privileges": {
+      "all": {
+        "create": true,
+        "read": true,
+        "update": true,
+        "delete": true
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "charass_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "targetType",
+        "attr": {
+          "type": "String",
+          "column": "charass_target_type",
+          "value": "SI"
+        }
+      },
+      {
+        "name": "salesOrderLine",
+        "attr": {
+          "type": "Number",
+          "column": "charass_target_id"
+        }
+      },
+      {
+        "name": "characteristic",
+        "toOne": {
+          "type": "Characteristic",
+          "column": "charass_char_id",
+          "required": true
+        }
+      },
+      {
+        "name": "value",
+        "attr": {
+          "type": "String",
+          "column": "charass_value"
+        }
+      },
+      {
+        "name": "price",
+        "attr": {
+          "type": "Money",
+          "column": "charass_price"
+        }
+      }
+    ],
+    "isNestedOnly": true,
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "SalesOrderLineComment",
+    "table": "comment",
+    "idSequenceName": "comment_comment_id_seq",
+    "comment": "Sales Order Line Comment Map",
+    "privileges": {
+      "all": {
+        "create": true,
+        "read": true,
+        "update": "EditOthersComments",
+        "delete": false
+      },
+      "personal": {
+        "update": "EditOwnComments",
+        "properties": [
+          "createdBy"
+        ]
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "comment_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "sourceType",
+        "attr": {
+          "type": "String",
+          "column": "comment_source",
+          "value": "SI"
+        }
+      },
+      {
+        "name": "salesOrderLine",
+        "attr": {
+          "type": "Number",
+          "column": "comment_source_id"
+        }
+      },
+      {
+        "name": "commentType",
+        "toOne": {
+          "type": "CommentType",
+          "column": "comment_cmnttype_id",
+          "required": true
+        }
+      },
+      {
+        "name": "text",
+        "attr": {
+          "type": "String",
+          "column": "comment_text"
+        }
+      },
+      {
+        "name": "isPublic",
+        "attr": {
+          "type": "Boolean",
+          "column": "comment_public",
+          "value": true
+        }
+      },
+      {
+        "name": "created",
+        "attr": {
+          "type": "Date",
+          "column": "comment_date"
+        }
+      },
+      {
+        "name": "createdBy",
+        "attr": {
+          "type": "String",
+          "column": "comment_user"
+        }
+      }
+    ],
+    "isNestedOnly": true,
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "SalesOrderListItem",
+    "table": "xt.coheadinfo",
+    "isRest": true,
+    "comment": "Sales Order List Item Map",
+    "privileges": {
+      "all": {
+        "create": false,
+        "read": "ViewSalesOrders MaintainSalesOrders IssueStockToShipping",
+        "update": false,
+        "delete": false
+      },
+      "attribute": {
+        "total": {
+          "view": "MaintainSalesOrders ViewSalesOrders ViewSalesOrderTotals"
+        }
+      },
+      "personal": {
+        "create": false,
+        "read": "ViewPersonalCRMAccounts",
+        "update": false,
+        "delete": false,
+        "properties": [
+          "crmaccountUsers"
+        ]
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "cohead_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "number",
+        "attr": {
+          "type": "String",
+          "column": "cohead_number",
+          "isNaturalKey":true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid"
+        }
+      },
+      {
+        "name": "customer",
+        "toOne": {
+          "isNested": true,
+          "type": "CustomerRelation",
+          "column": "cohead_cust_id"
+        }
+      },
+      {
+        "name": "customerPurchaseOrderNumber",
+        "attr": {
+          "type": "String",
+          "column": "cohead_custponumber"
+         }
+      },
+      {
+        "name": "status",
+        "attr": {
+          "type": "String",
+          "column": "cohead_status"
+         }
+      },
+      {
+        "name": "scheduleDate",
+        "attr": {
+          "type": "DueDate",
+          "column": "schedule_date"
+        }
+      },
+      {
+        "name": "orderDate",
+        "attr": {
+          "type": "Date",
+          "column": "cohead_orderdate"
+         }
+      },
+      {
+        "name": "holdType",
+        "attr": {
+          "type": "String",
+          "column": "cohead_holdtype"
+         }
+      },
+      {
+        "name": "orderNotes",
+        "attr": {
+          "type": "String",
+          "column": "cohead_ordercomments"
+         }
+      },
+      {
+        "name": "currency",
+        "toOne": {
+          "type": "Currency",
+          "column": "cohead_curr_id"
+         }
+      },
+      {
+        "name": "total",
+        "attr": {
+          "type": "Number",
+          "column": "total"
+         }
+      },
+      {
+        "name": "salesRep",
+        "toOne": {
+          "type": "SalesRep",
+          "column": "cohead_salesrep_id",
+          "isNested": true
+         }
+      },
+      {
+        "name": "billtoName",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billtoname"
+        }
+      },
+      {
+        "name": "billtoCity",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billtocity"
+        }
+      },
+      {
+        "name": "billtoState",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billtostate"
+        }
+      },
+      {
+        "name": "billtoCountry",
+        "attr": {
+          "type": "String",
+          "column": "cohead_billtocountry"
+        }
+      },
+      {
+        "name": "shiptoName",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shiptoname"
+        }
+      },
+      {
+        "name": "shiptoCity",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shiptocity"
+        }
+      },
+      {
+        "name": "shiptoState",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shiptostate"
+        }
+      },
+      {
+        "name": "shiptoCountry",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shiptocountry"
+        }
+      },
+      {
+        "name": "crmaccountUsers",
+        "toMany": {
+          "type": "ShareUsers",
+          "column": "obj_uuid",
+          "inverse": "uuid"
+        }
+      }
+    ],
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "SalesOrderRelation",
+    "table": "xt.coheadinfo",
+    "isRest": true,
+    "comment": "Sales Order Relation Map",
+    "privileges": {
+      "all": {
+        "create": "MaintainSalesOrders",
+        "read": "ViewSalesOrders",
+        "update": "MaintainSalesOrders",
+        "delete": "MaintainSalesOrders"
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "cohead_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "number",
+        "attr": {
+          "type": "String",
+          "column": "cohead_number",
+          "isNaturalKey":true
+        }
+      },
+      {
+        "name": "customer",
+        "attr": {
+          "type": "String",
+          "column": "cust_number"
+        }
+      },
+      {
+        "name": "orderDate",
+        "attr": {
+          "type": "Date",
+          "column": "cohead_orderdate"
+        }
+      },
+      {
+        "name": "status",
+        "attr": {
+          "type": "String",
+          "column": "cohead_status"
+        }
+      },
+      {
+        "name": "shipVia",
+        "attr": {
+          "type": "String",
+          "column": "cohead_shipvia"
+        }
+      },
+      {
+        "name": "total",
+        "attr": {
+          "type": "Money",
+          "column": "total"
+        }
+      },
+      {
+        "name": "opportunity",
+        "attr": {
+          "type": "String",
+          "column": "ophead_number"
+        }
+      }
+    ],
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "SYS",
+    "type": "SalesOrderRelation",
+    "table": "xt.coheadinfo",
+    "comment": "Sales Order Relation Map",
+    "privileges": {
+      "all": {
+        "create": "MaintainSalesOrders",
+        "read": "ViewSalesOrders",
+        "update": "MaintainSalesOrders",
+        "delete": "MaintainSalesOrders"
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "cohead_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "number",
+        "attr": {
+          "type": "String",
+          "column": "cohead_number",
+          "isNaturalKey":true
+        }
+      }
+    ],
+    "isSystem": true
+  }
+]

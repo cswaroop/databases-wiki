@@ -1,0 +1,28 @@
+CREATE OR REPLACE FUNCTION format_us_full_name_debug(
+                                         prefix text, 
+                                         firstname text, 
+                                         mi text, 
+                                         lastname text, 
+                                         suffix text)
+  RETURNS text AS
+$BODY$
+DECLARE
+	fname_mi text;
+	fmi_lname text;
+	prefix_fmil text;
+	pfmil_suffix text;
+BEGIN	
+	fname_mi := CONCAT_WS(' ', CASE trim(firstname) WHEN '' THEN NULL ELSE firstname END, CASE trim(mi) WHEN '' THEN NULL ELSE mi END || '.');
+	RAISE NOTICE 'firstname mi.: %', fname_mi;
+	fmi_lname := CONCAT_WS(' ', CASE fname_mi WHEN '' THEN NULL ELSE fname_mi END,CASE trim(lastname) WHEN '' THEN NULL ELSE lastname END);
+	RAISE NOTICE 'firstname mi. lastname: %', fmi_lname;
+	prefix_fmil := CONCAT_WS('. ', CASE trim(prefix) WHEN '' THEN NULL ELSE prefix END, CASE fmi_lname WHEN '' THEN NULL ELSE fmi_lname END);
+	RAISE NOTICE 'prefix. firstname mi lastname: %', prefix_fmil;
+	pfmil_suffix := CONCAT_WS(', ', CASE prefix_fmil WHEN '' THEN NULL ELSE prefix_fmil END, CASE trim(suffix) WHEN '' THEN NULL ELSE suffix || '.' END);
+	RAISE NOTICE 'prefix. firstname mi lastname, suffix.: %', pfmil_suffix;
+
+	RETURN pfmil_suffix;
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE;
+

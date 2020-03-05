@@ -1,0 +1,13 @@
+-- Group: gltransactions
+-- Name:  glq
+-- Notes: without projects
+
+SELECT CASE WHEN accnt_type IN ('A','E') THEN 
+                           COALESCE(SUM(gltrans_amount),0) * -1
+                         ELSE COALESCE(SUM(gltrans_amount),0) END AS glamount 
+                  FROM gltrans 
+                    JOIN accnt ON gltrans_accnt_id = accnt_id
+                  WHERE gltrans_date BETWEEN  <? value("periodStart") ?> AND <? value("startDate") ?>::date - interval '1 day'
+                   AND  gltrans_accnt_id =  <? value("accnt_id") ?> 
+                    AND  NOT gltrans_deleted 
+                  GROUP BY accnt_type

@@ -1,0 +1,51 @@
+-- Group: salesOrderItem
+-- Name: indentedbomavail
+-- Notes: used by salesOrderItem
+--        Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+
+SELECT itemsite_id,
+       reorderlevel,
+       bomdata_bomwork_level,
+       bomdata_bomwork_id,
+       bomdata_bomwork_parent_id,
+       bomdata_bomwork_seqnumber AS seqnumber,
+       bomdata_item_number AS item_number,
+       bomdata_itemdescription AS item_descrip,
+       bomdata_uom_name AS uom_name,
+       pendalloc,
+       ordered,
+       availableqoh,
+       (totalalloc + pendalloc) AS totalalloc,
+       (availableqoh + ordered - (totalalloc + pendalloc)) AS totalavail,
+       'qty' AS pendalloc_xtnumericrole,
+       'qty' AS ordered_xtnumericrole,
+       'qty' AS availableqoh_xtnumericrole,
+       'qty' AS totalalloc_xtnumericrole,
+       'qty' AS totalavail_xtnumericrole,
+       CASE WHEN availableqoh < pendalloc THEN 'error'
+            WHEN (availableqoh + ordered - (totalalloc + pendalloc)) < 0  THEN 'error'
+            WHEN (availableqoh + ordered - (totalalloc + pendalloc)) < reorderlevel THEN 'warning'
+       END AS qtforegroundrole,
+       bomdata_bomwork_level - 1 AS xtindentrole
+  FROM ( SELECT itemsite_id,
+                CASE WHEN(itemsite_useparams) THEN itemsite_reorderlevel
+                     ELSE 0.0
+                END AS reorderlevel,
+                ib.*,
+                ((bomdata_qtyfxd::NUMERIC + bomdata_qtyreq::NUMERIC * <? value("qty") ?>) * (1 + bomdata_scrap::NUMERIC)) AS pendalloc,
+                (qtyAllocated(itemsite_id, DATE(<? value("date") ?>) + <? value("offset") ?>) -
+                              ((bomdata_qtyfxd::NUMERIC + bomdata_qtyper::NUMERIC * <? value("origQtyOrd") ?>) *
+                              (1 + bomdata_scrap::NUMERIC))) AS totalalloc,
+                qtyAvailable(itemsite_id) AS availableqoh,
+                qtyOrdered(itemsite_id, DATE(<? value("date") ?>) + <? value("offset") ?>) AS ordered
+           FROM indentedBOM(<? value("item_id") ?>,
+                            getActiveRevId('BOM', <? value("item_id") ?>),
+                            0,0) ib 
+                LEFT OUTER JOIN itemsite ON ((itemsite_item_id=bomdata_item_id) AND
+                                             (itemsite_warehous_id=<? value("warehous_id") ?>))
+       ) AS data
+WHERE (bomdata_item_id > 0)
+      <? literal("charClause") ?>
+ORDER BY bomdata_seq_ord
+;

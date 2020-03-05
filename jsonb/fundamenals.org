@@ -1,0 +1,56 @@
+* JSONB vs JSONB
+#+begin_src sql
+SELECT j::json AS json,
+       j::jsonb AS jsonb
+FROM
+   (SELECT '{"cc":0, "aa": 2, "aa":1 "b":1}' AS j) AS foo;
+#+end_src
+
+* JSON Path query language
+#+begin_src sql
+'$.floor[*].apt[*] ? (@.area > 40 && @.area < 90)'
+#+end_src
+** Lax vs Strict
+Missing keys
+#+begin_src  sql
+SELECT jsonb '{"a":1}' @? 'lax $.b ? (@ > 1)';
+SELECT jsonb '{"a":1}' @? 'strict $.b ? (@ > 1)';
+#+end_src
+arrays are unwrapped
+#+begin_src sql
+SELECT jsonb '[1,2[3,4,5]]' @? 'lax $ ? (@ == 5)';
+SELECT jsonb '[1,2[3,4,5]]' @? 'strict $[*] ? (@[*] == 5)';
+#+end_src
+
+** jsonpath type
+#+begin_src sql
+SELECT '$a.>1'::jsonpath;
+#+end_src
+** JSON path filters
+#+begin_src sql
+SELECT jsonb_path_query('[1,0,2]', '$[*] ? (1 / @ >= 1)');
+#+end_src
+** JSON path methods
+#+begin_src sql
+SELECT jsonb_path_query(jsonb '{"a":5, "b":2}','$ ? (@.a > 1).keyvalue()') FROM house;
+SELECT jsonb_path_query(jsonb '{"a":5, "b":2}','$ ? (@.a > 1).keyvalue().key') FROM house;
+#+end_src
+** JSONpath functions
+#+begin_src sql
+jsonb_path_exists() => boolean
+jsonb_path_match() => boolean
+jsonb_path_query() => setof jsonb
+jsonb_path_query_array() => jsonb
+jsonb_path_query_first() => jsonb
+
+-- path variables
+SELECT jsonb_path_query_array('[1,2,3,4,5]', '$[*] ? (@ > $x)',vars => '{"x": 2}');
+
+#+end_src
+
+*** silent flag
+#+begin_src sql
+SELECT jsonb_path_query('[]', 'strict $.a');
+SELECT jsonb_path_query('[]', 'strict $.a', silent => true);
+#+end_src
+

@@ -1,0 +1,15 @@
+-- Group: gltransactions
+-- Name:  begq
+-- Notes: added by Jim
+SELECT 
+                     CASE WHEN accnt_type IN ('A','E') THEN 
+                       trialbal_beginning * -1 
+                     ELSE trialbal_beginning END AS trialbal_beginning,
+                     period_start 
+                   FROM trialbal 
+                     JOIN accnt ON (trialbal_accnt_id=accnt_id), 
+                     period 
+                   WHERE (trialbal_period_id=period_id)
+                     AND  (trialbal_accnt_id= <? value("accnt_id") ?>)
+                     AND  (<? value("startDate") ?> BETWEEN period_start AND period_end);
+                     

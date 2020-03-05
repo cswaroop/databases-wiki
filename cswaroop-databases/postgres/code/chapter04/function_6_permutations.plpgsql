@@ -1,0 +1,15 @@
+CREATE FUNCTION permutations(INOUT a int, 
+                             INOUT b int, 
+                             INOUT c int)
+RETURNS SETOF RECORD
+AS $$
+BEGIN
+    RETURN NEXT;
+    SELECT b,c INTO c,b; RETURN NEXT;
+    SELECT a,b INTO b,a; RETURN NEXT;
+    SELECT b,c INTO c,b; RETURN NEXT;
+    SELECT a,b INTO b,a; RETURN NEXT;
+    SELECT b,c INTO c,b; RETURN NEXT;
+END;
+$$ LANGUAGE plpgsql;
+

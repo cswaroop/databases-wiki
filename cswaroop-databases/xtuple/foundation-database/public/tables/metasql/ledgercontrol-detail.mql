@@ -1,0 +1,91 @@
+-- Group: ledgercontrol
+-- Name:  detail
+-- Notes: query to log ledger control values
+
+SELECT ledger, 
+coalesce(glamount, 0) AS glamount,
+coalesce(subledger, 0) AS subledger,
+CASE WHEN ledger IN ('Payables', 'Uninvoiced Receipts') THEN
+coalesce(glamount, 0) - coalesce(subledger, 0) ELSE coalesce(subledger, 0) - coalesce(glamount, 0) END  AS varamt,
+CASE WHEN glamount != subledger THEN 'emphasis'
+     END AS qtforegroundrole
+ FROM
+
+
+(--        Payables
+SELECT 'Payables' AS ledger,  sum(trialbal_ending) AS glamount,
+(SELECT 
+SUM( CASE WHEN apopen_doctype IN ('V', 'D') THEN (apopen_amount - apopen_paid)
+ELSE (apopen_amount - apopen_paid) * -1 END) 
+  FROM apopen WHERE apopen_open AND apopen_docdate <= period_end) AS subledger
+
+   FROM trialbal
+JOIN period ON current_date BETWEEN period_start AND period_end AND trialbal_period_id = period_id
+ WHERE  trialbal_accnt_id IN (SELECT apaccnt_ap_accnt_id FROM apaccnt)
+ GROUP BY ledger, subledger
+
+UNION ALL
+-- Uninvoiced Receipts
+SELECT 'Uninvoiced Receipts' AS ledger,  sum(trialbal_ending) AS glamount,
+(SELECT 
+SUM( CASE WHEN recv_order_type = 'PO' THEN
+ROUND(recv_qty * recv_recvcost,2)
+ELSE
+ROUND(recv_qty * recv_recvcost *-1,2)END) 
+  FROM recv WHERE recv_invoiced = false AND recv_vohead_id IS NULL AND recv_posted AND recv_order_type = 'PO') AS subledger
+  FROM trialbal 
+ WHERE trialbal_period_id  = (SELECT period_id FROM period WHERE current_date BETWEEN period_start AND period_end)
+ AND trialbal_accnt_id IN (SELECT costcat_liability_accnt_id FROM costcat 
+		UNION ALL SELECT expcat_liability_accnt_id FROM expcat)
+ GROUP BY ledger, subledger
+
+ UNION ALL
+-- Receivables
+SELECT 'Receivables' AS ledger,  sum(trialbal_ending * -1) AS glamount,
+(SELECT 
+SUM( CASE WHEN aropen_doctype IN ('I', 'D') THEN ROUND((aropen_amount - aropen_paid)/aropen_curr_rate,2)
+ELSE ROUND((aropen_amount - aropen_paid)/aropen_curr_rate * -1,2) END) 
+  FROM aropen WHERE aropen_open AND aropen_docdate <= period_end) AS subledger
+     FROM trialbal
+JOIN period ON current_date BETWEEN period_start AND period_end AND trialbal_period_id = period_id 
+ WHERE  trialbal_accnt_id IN (SELECT araccnt_ar_accnt_id FROM araccnt 
+		UNION ALL SELECT araccnt_deferred_accnt_id FROM araccnt)
+ GROUP BY ledger, subledger
+ 
+UNION ALL
+-- Inventory
+SELECT 'Inventory' AS ledger,  SUM(trialbal_ending * -1) AS glamount,
+(SELECT 
+SUM( CASE itemsite_costmethod WHEN 'S' THEN
+ROUND(itemsite_qtyonhand * stdcost(itemsite_item_id),2)
+WHEN 'C' THEN 
+ROUND(itemsite_value) ELSE 0 END) 
+  FROM itemsite) AS subledger
+  FROM trialbal 
+ WHERE trialbal_period_id  = (SELECT period_id FROM period WHERE current_date BETWEEN period_start AND period_end)
+ AND trialbal_accnt_id IN (SELECT costcat_asset_accnt_id FROM costcat )
+ --GROUP BY ledger, subledger
+ 
+UNION ALL
+-- WIP
+SELECT 'WIP' AS ledger,  sum(trialbal_ending * -1) AS glamount,
+(SELECT 
+SUM( round(wo_wipvalue,2) )FROM wo ) AS subledger
+  FROM trialbal 
+ WHERE trialbal_period_id  = (SELECT period_id FROM period WHERE current_date BETWEEN period_start AND period_end)
+ AND trialbal_accnt_id IN (SELECT costcat_wip_accnt_id FROM costcat 
+		)
+ GROUP BY ledger, subledger
+ 
+UNION ALL
+-- Shipping Asset
+SELECT 'Shipping Asset' AS ledger,  sum(trialbal_ending * -1) AS glamount,
+(SELECT ROUND(COALESCE(SUM(shipitem_value), 0.0),2) 
+  FROM shipitem JOIN shiphead ON (shipitem_shiphead_id=shiphead_id)
+  WHERE NOT shiphead_shipped) AS subledger
+  FROM trialbal 
+ WHERE trialbal_period_id  = (SELECT period_id FROM period WHERE current_date BETWEEN period_start AND period_end)
+ AND trialbal_accnt_id IN (SELECT costcat_shipasset_accnt_id FROM costcat 
+		)
+ GROUP BY ledger, subledger) AS ldata;
+

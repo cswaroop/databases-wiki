@@ -1,0 +1,74 @@
+
+DROP FUNCTION register_xact_callbacks(text, text);
+
+CREATE FUNCTION register_xact_callbacks() RETURNS void
+     AS 'MODULE_PATHNAME', 'register_xact_callbacks'
+     LANGUAGE C STRICT;
+
+-----------------------------------------
+
+CREATE FUNCTION get_commit_count() RETURNS integer
+     AS 'MODULE_PATHNAME', 'get_commit_count'
+     LANGUAGE C STRICT;
+     
+CREATE FUNCTION get_abort_count() RETURNS integer
+     AS 'MODULE_PATHNAME', 'get_abort_count'
+     LANGUAGE C STRICT;
+
+CREATE FUNCTION get_subx_start_count() RETURNS integer
+     AS 'MODULE_PATHNAME', 'get_subx_start_count'
+     LANGUAGE C STRICT;
+CREATE FUNCTION get_subx_commit_count() RETURNS integer
+     AS 'MODULE_PATHNAME', 'get_subx_commit_count'
+     LANGUAGE C STRICT;
+CREATE FUNCTION get_subx_abort_count() RETURNS integer
+     AS 'MODULE_PATHNAME', 'get_subx_abort_count'
+     LANGUAGE C STRICT;
+
+CREATE FUNCTION get_current_top_xid() RETURNS integer
+     AS 'MODULE_PATHNAME', 'get_current_top_xid'
+     LANGUAGE C STRICT;
+
+CREATE FUNCTION get_last_committed_xid() RETURNS integer
+     AS 'MODULE_PATHNAME', 'get_last_committed_xid'
+     LANGUAGE C STRICT;
+
+CREATE FUNCTION get_last_committed_subxid() RETURNS integer
+     AS 'MODULE_PATHNAME', 'get_last_committed_subxid'
+     LANGUAGE C STRICT;
+
+-----------------------------------------------------
+
+DROP VIEW IF EXISTS xid_info;
+
+CREATE VIEW xid_info AS
+SELECT get_commit_count() as commits,
+       get_abort_count() as aborts,
+       get_subx_start_count() as sub_starts,
+       get_subx_commit_count() as sub_commits,
+       get_subx_abort_count() as sub_aborts,
+       get_current_top_xid() as top_xid,
+       get_last_committed_xid() as last_committed_xid,
+       get_last_committed_subxid() as last_committed_subxid
+;
+
+-----------------------------------------------------
+-- note overloading of SQL function name "add_one" --
+-----------------------------------------------------
+
+CREATE FUNCTION add_one(double precision) RETURNS double precision
+     AS 'MODULE_PATHNAME', 'add_one_float8'
+     LANGUAGE C STRICT;
+
+CREATE FUNCTION makepoint(point, point) RETURNS point
+     AS 'MODULE_PATHNAME', 'makepoint'
+     LANGUAGE C STRICT;
+
+CREATE FUNCTION copytext(text) RETURNS text
+     AS 'MODULE_PATHNAME', 'copytext'
+     LANGUAGE C STRICT;
+
+CREATE FUNCTION concat_text(text, text) RETURNS text
+     AS 'MODULE_PATHNAME', 'concat_text'
+     LANGUAGE C STRICT;
+

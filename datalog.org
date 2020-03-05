@@ -1,0 +1,373 @@
+Datalog is an ideal query language suitable to query EAV data model (Universal Schema)
+
+SQL would be very awakward to query such data model with many recursive self joins.  But EAV data model has its fans especially where customizable software is written.  JSON/XML/KV support in databases has reduced reliance on this data model.  This data model is native to Datomic database.
+With such universal data model (EAV) everything like Trees (Hierarchy) and Graphs (DFS, BFS) can be represented easily.  Let us see how querying such data model works with various representations.
+
+EAV model is supported by indexes EAVT, AEVT, AVET (:db/unique), VAET(:db.type/ref) to help efficiently navigate
+
+http://www.learndatalogtoday.org/
+https://docs.datomic.com/
+https://github.com/cognitect-labs/day-of-datomic-cloud
+
+https://hashrocket.com/blog/posts/using-datomic-as-a-graph-database
+https://github.com/aysylu/loom
+
+in Datomic datalog queries are written in EDN notation.  Data model is eav-Tx and is called Datom.
+#+begin_src clojure
+[167 :person/name "James Cameron" 102]
+[234 :movie/title "Die Hard" 102]
+[234 :movie/year 1987 102]
+[235 :movie/title "Terminator" 102] ; all tx are 102. i.e. they are part of same transaction
+[235 :movie/director 167 102] ; director is 167 i.e. another entity reference to James Cameron
+#+end_src
+
+#+begin_src clojure
+;; find all movie titles in a database
+;; SELECT title from movies
+[:find ?title
+ :where [_ :movie/title ?title]
+]
+#+end_src
+
+#+begin_src clojure
+[:find ?e
+ :where [?e :person/name "James Cameron"]
+]
+#+end_src
+When you want to explicitly ignore transaction part of the data..
+#+begin_src clojure
+[:find ?e
+ :where [?e :person/name "James Cameron" _]
+]
+#+end_src
+Find the entity ids of the movies made in 1987
+#+begin_src clojure
+[:find ?e
+ :where [?e :movie/year 1987]
+]
+#+end_src
+Find the entity-id and titles of the movies in the DB
+#+begin_src clojure
+[:find ?e ?t
+ :where [?e :movie/title ?t]
+]
+#+end_src
+Find the name of all the people in the DB
+#+begin_src clojure
+[:find ?name
+ :where [_ :person/name ?name]
+]
+#+end_src
+Find all movie title made in 1987
+#+begin_src clojure
+[:find ?title
+ :where [?e :movie/year 1987]
+        [?e :movie/title ?title]
+]
+#+end_src
+Find who starred in "Lethal Weapon"
+#+begin_src clojure
+[:find ?name
+ :where [?movie-id :movie/title "Lethal Weapon"]
+        [?movie-id :movie/cast ?person-id]
+        [?person-id :person/name ?name]
+]
+#+end_src
+Find year of Alien release
+#+begin_src clojure
+[:find ?year
+ :where [?movie-id :movie/title "Alien"]
+        [?movie-id :movie/year ?year]
+]
+#+end_src
+** Parameterized queries
+These queries are executed as follows
+(q query db "Sylvester Stallone")
+*** Collections as parameters
+#+begin_src clojure
+[:find ?title
+ :in $ [?director ?actor]
+ :where
+ [?d :person/name ?director]
+ [?a :person/name ?actor]
+ [?m :movie/director ?d]
+ [?m :movie/cast ?a]
+ [?m :movie/title ?title]]
+#+end_src
+*** Relations as parameters
+    #+begin_src clojure
+    ;; Input #1
+    [["Die Hard" 140700000]
+    ["Alien" 104931801]
+    ["Lethal Weapon" 120207127]
+    ["Commando" 57491000]]
+    ;; Query
+    [:find ?title ?box-office
+    :in $ ?director [[?title ?box-office]]
+    :where
+    [?p :person/name ?director]
+    [?m :movie/director ?p]
+    [?m :movie/title ?title]]
+    #+end_src
+** Metadata queries
+Find all attributes that are associated with person entities in DB
+#+begin_src clojure
+;; gets attribute ids
+[:find ?attr
+ :where 
+ [?p :person/name]
+ [?p ?attr]]
+;; to get actual attribute keywords.  This is because attributes are also entities in DB.
+[:find ?attr
+ :where
+ [?p :person/name]
+ [?p ?a]
+ [?a :db/ident ?attr]]
+#+end_src
+Find the time that "James Cameron" was set as the name for that person entity:
+#+begin_src clojure
+[:find ?timestamp
+ :where
+ [?p :person/name "James Cameron" ?tx]
+ [?tx :db/txInstant ?timestamp]]
+#+end_src
+** Predicates
+#+begin_src clojure
+[:find ?title
+ :where
+ [?m :movie/title ?title]
+ [?m :movie/year ?year]
+ [(< ?year 1984)]]
+#+end_src
+
+#+begin_src clojure
+[:find ?name
+ :where 
+ [?p :person/name ?name]
+ [(.startsWith ?name "M")]]
+#+end_src
+** Pure functions as predicates
+#+begin_src clojure
+(defn age [birthday today]
+  (quot (- (.getTime today)
+           (.getTime birthday))
+        (* 1000 60 60 24 365)))
+[:find ?age
+ :in $ ?name ?today
+ :where
+ [?p :person/name ?name]
+ [?p :person/born ?born]
+ [(tutorial.fns/age ?born ?today) ?age]]
+#+end_src
+You can't nest then. you need to bind intermediate results in temp pattern variables
+[(g ?x) ?t]
+[(f ?t) ?a]
+** Aggregates
+   sum,min, max
+
+Find the count of movies in DB
+#+begin_src clojure
+[:find (count ?m)
+ :where
+ [?m :movie/title]]
+#+end_src
+Find the birthdate of oldest person in DB
+#+begin_src 
+[:find (min ?date)
+ :where
+ [_ :person/born ?date]]
+#+end_src
+** Rules
+   for abstracting reusable parts
+#+begin_src clojure
+;; make this reusable
+[?p :person/name ?name]
+[?m :movie/cast ?p]
+[?m :movie/title ?title]
+;; as rule
+[(actor-movie ?name ?title)
+ [?p :person/name ?name]
+ [?m :movie/cast ?p]
+ [?m :movie/title ?title]]
+
+[:find ?name
+ :in $ % ; % represents rules
+ (actor-movie ?name "The Terminator")]
+
+#+end_src
+
+#+begin_src clojure
+[[(associated-with ?person ?movie)
+  [?movie :movie/cast ?person]]
+ [(associated-with ?person ?movie)
+  [?movie :movie/director ?person]]]
+
+[:find ?name
+ :in $ %
+ :where
+ [?m :movie/title "Predator"]
+ (associated-with ?p ?m)
+ [?p :person/name ?name]]
+#+end_src
+Write a rule [movie-year ?title ?year] where ?title is the title of some movie and ?year is that movies release year.
+#+begin_src clojure
+[:find ?title
+ :in $ %
+ :where
+ [movie-year ?title 1991]]
+
+[[(movie-year ?title ?year)
+  [?m :movie/title ?title]
+  [?m :movie/year ?year]]]
+
+#+end_src
+Two people are friends if they have worked together in a movie. Write a rule [friends ?p1 ?p2] where p1 and p2 are person entities. Try with a few different ?name inputs to make sure you got it right. There might be some edge cases here.
+#+begin_src clojure
+;; Query
+[:find ?friend
+ :in $ % ?name
+ :where
+ [?p1 :person/name ?name]
+ (friends ?p1 ?p2)
+ [?p2 :person/name ?friend]]
+;; Rules
+[[(friends ?p1 ?p2)
+  [?m :movie/cast ?p1]
+  [?m :movie/cast ?p2]
+  [(not= ?p1 ?p2)]]
+ [(friends ?p1 ?p2) [?m :movie/cast ?p1] [?m :movie/director ?p2]]
+ [(friends ?p1 ?p2) (friends ?p2 ?p1)]]
+
+#+end_src
+Write a rule [sequels ?m1 ?m2] where ?m1 and ?m2 are movie entities. You'll need to use the attribute :movie/sequel. To implement this rule correctly you can think of the problem like this: A movie ?m2 is a sequel of ?m1 if either
+
+    ?m2 is the "direct" sequel of m1 or
+    ?m2 is the sequel of some movie ?m and that movie ?m is the sequel to ?m1.
+
+There are (at least) three different ways to write the above query. Try to find all three solutions.
+
+#+begin_src clojure
+;; Query
+[:find ?sequel
+ :in $ % ?title
+ :where
+ [?m :movie/title ?title]
+ (sequels ?m ?s)
+ [?s :movie/title ?sequel]]
+;; Rules
+[[(sequels ?m1 ?m2) [?m1 :movie/sequel ?m2]]
+ [(sequels ?m1 ?m2) [?m :movie/sequel ?m2] (sequels ?m1 ?m)]]
+
+#+end_src
+
+* Datomic, DataScript, DataHike, CruxDB
+#+begin_src clojure
+{:find [e]
+ :where  [[e :name "Pablo"]] 
+}
+#+end_src
+
+#+begin_src clojure
+{:find [p1]
+ :where[[p1 :name n]
+        [p1 :last-name n]
+        [p1 :name "Smith]]
+}
+#+end_src
+
+* Match an entity ID and value
+
+#+begin_src clojure
+{:find '[n]
+	  :where '[[e :name n]]
+	  :args [{'e :ivan
+	          'n "Ivan"}]}
+#+end_src
+
+
+* Match entities with given values
+#+begin_src clojure
+{:find '[e]
+	  :where '[[e :name n]]
+	  :args [{'n "Ivan"}
+	         {'n "Petr"}]}
+#+end_src
+* Query: "Match entities with given value tuples"
+#+begin_src clojure
+{:find '[e]
+	  :where '[[e :name n]
+	           [e :last-name l]]
+	  :args [{'n "Ivan" 'l "Ivanov"}
+	         {'n "Petr" 'l "Petrov"
+	          }]}
+#+end_src
+
+* Query: "Use predicates with arguments"
+#+begin_src clojure
+{:find '[n]
+	  :where '[[(re-find #"I" n)]
+	           [(= l "Ivanov")]]
+	  :args [{'n "Ivan" 'l "Ivanov"}
+	         {'n "Petr" 'l "Petrov"}]}
+#+end_src
+* Query: "Use range constraints with arguments"
+#+begin_src clojure
+	 {:find '[age]
+	  :where '[[(>= age 21)]]
+	  :args [{'age 22}]}
+#+end_src
+* Joins
+#+begin_src clojure
+{:find [p1 p2]
+	   :where [[p1 :name n]
+	           [p2 :name n]]}
+#+end_src
+* Query: "Join with two attributes, including a multi-valued attribute"
+#+begin_src clojure
+{:find [e2]
+	   :where [[e :last-name l]
+	           [e2 :follows l]
+	           [e :name "Ivan"]]}
+#+end_src
+
+* Querying
+#+begin_src clojure
+(d/q '[:find ?name
+       :where
+       [?e :maker/name "BMW"]
+       [?c :car/maker ?e]
+       [?c :car/name ?name]]
+     @conn)
+#+end_src
+* Bitemporal graph Queries (CruxDB)
+  https://opencrux.com/docs
+  - Unbundled database.  i.e. storage (eventsource), indexes, query, transactions(writes) seperated.
+  - Schemaless, Distributed, Eviction (read GDPR compliant), Bitemporal(transcation-time and valid-time allowing going back Point-in-Time)supporting late arriving fact ingestion
+    - Bitemporal helps in coping with out-of-order arrival of facts, research systems (Anti-money laundering, KYC, Due deligence, quality control) etc.
+
+Question:
+
+Find all persons who are known to be present in the United States on day 2 (valid time), as of day 3 (transaction time)
+
+#+begin_src clojure
+ {   :find [p entry-pt arrival-time departure-time]
+	   :where [[p :entry-pt entry-pt]
+	           [p :arrival-time arrival-time]
+	           [p :departure-time departure-time]]}
+	  #inst "2019-01-03"                    ; `as of` transaction time
+	  #inst "2019-01-02"                    ; `as at` valid time
+#+end_src
+
+** Transactions
+   put, delete (soft delete making valid-time invalid), CAS (compare and swap), eviction (hard delete)
+** Queries
+*** Crux is a document database. 
+    all top level elements are indexed for ad-hoc joins
+   
+*** Crux is also a graph database.
+    supports recursive travels for navigating arbitrary depth graphs.
+    graph friendly indexes
+    
+** DataScript
+https://github.com/tonsky/datascript
+

@@ -1,0 +1,8 @@
+CREATE FUNCTION mid(keyfield varchar, starting_point integer) RETURNS varchar
+AS
+$$
+BEGIN
+	RETURN substring(keyfield,starting_point);
+END
+$$
+LANGUAGE plpgsql;

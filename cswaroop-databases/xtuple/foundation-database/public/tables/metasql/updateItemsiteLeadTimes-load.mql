@@ -1,0 +1,30 @@
+-- Group: updateItemsiteLeadTimes
+-- Name:  load
+-- Notes: used by updateItemSiteLeadTimes
+-- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- See www.xtuple.com/EULA for the full text of the software license.
+
+SELECT itemsite_id, item_number, item_descrip1, warehous_code
+FROM (SELECT CASE WHEN(item_type='L') THEN 0
+                  WHEN(item_type='M') THEN 1
+                  WHEN(item_type='F') THEN 2
+                  ELSE 3
+             END AS orderid,
+             bomLevelByItem(item_id) AS levelid,
+             itemsite_id, item_number, item_descrip1, warehous_code
+        FROM itemsite, item, classcode, whsinfo
+       WHERE ( (item_classcode_id=classcode_id)
+         AND (itemsite_active)
+         AND (item_active)
+         AND (itemsite_item_id=item_id)
+         AND (itemsite_warehous_id=warehous_id)
+<? if exists("classcode_id") ?>
+         AND (classcode_id=<? value("classcode_id") ?>)
+<? elseif exists("classcode_pattern") ?>
+         AND (classcode_code ~ <? value("classcode_pattern") ?>)
+<? endif ?>
+<? if exists("warehous_id") ?>
+         AND (itemsite_warehous_id=<? value("warehous_id") ?>)
+<? endif ?>
+            )
+      ORDER BY orderid DESC, levelid DESC) AS data;

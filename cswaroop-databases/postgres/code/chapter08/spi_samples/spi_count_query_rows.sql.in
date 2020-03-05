@@ -1,0 +1,6 @@
+CREATE FUNCTION count_returned_rows(text, integer) RETURNS integer
+    AS 'MODULE_PATHNAME', 'count_returned_rows'
+    LANGUAGE C STRICT;
+    
+    
+    

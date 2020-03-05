@@ -1,0 +1,127 @@
+[
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "Currency",
+    "table": "curr_symbol",
+    "isRest": true,
+    "idSequenceName": "curr_symbol_curr_id_seq",
+    "lockable": true,
+    "comment": "Currency Map",
+    "privileges": {
+      "all": {
+        "create": "CreateNewCurrency",
+        "read": true,
+        "update": "MaintainCurrencies",
+        "delete": "MaintainCurrencies"
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "curr_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "name",
+        "attr": {
+          "type": "String",
+          "column": "curr_name",
+          "required": true
+        }
+      },
+      {
+        "name": "symbol",
+        "attr": {
+          "type": "String",
+          "column": "curr_symbol",
+          "required": true
+        }
+      },
+      {
+        "name": "abbreviation",
+        "attr": {
+          "type": "String",
+          "column": "curr_abbr",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "isBase",
+        "attr": {
+          "type": "Boolean",
+          "column": "curr_base",
+          "required": true
+        }
+      }
+    ],
+    "isSystem": true
+  },
+  {
+    "context": "xtuple",
+    "nameSpace": "XM",
+    "type": "CurrencyRate",
+    "table": "curr_rate",
+    "isRest": true,
+    "idSequenceName": "curr_rate_curr_id_seq",
+    "comment": "Currency Map",
+    "privileges": {
+      "all": {
+        "create": "CreateNewCurrency",
+        "read": true,
+        "update": "MaintainCurrencies",
+        "delete": "MaintainCurrencies"
+      }
+    },
+    "properties": [
+      {
+        "name": "id",
+        "attr": {
+          "type": "Number",
+          "column": "curr_rate_id",
+          "isPrimaryKey": true
+        }
+      },
+      {
+        "name": "uuid",
+        "attr": {
+          "type": "String",
+          "column": "obj_uuid",
+          "isNaturalKey": true
+        }
+      },
+      {
+        "name": "currency",
+        "toOne": {
+          "type": "Currency",
+          "column": "curr_id"
+        }
+      },
+      {
+        "name": "rate",
+        "attr": {
+          "type": "Number",
+          "column": "curr_rate"
+        }
+      },
+      {
+        "name": "effective",
+        "attr": {
+          "type": "EffectiveDate",
+          "column": "curr_effective"
+        }
+      },
+      {
+        "name": "expires",
+        "attr": {
+          "type": "ExpireDate",
+          "column": "curr_expires"
+        }
+      }
+    ],
+    "isSystem": true
+  }
+]

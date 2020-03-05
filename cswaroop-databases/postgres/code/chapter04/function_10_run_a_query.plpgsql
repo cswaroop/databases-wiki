@@ -1,0 +1,12 @@
+CREATE OR REPLACE FUNCTION run_a_query(query TEXT)
+  RETURNS SETOF RECORD 
+AS $$
+DECLARE
+    retval RECORD;
+BEGIN
+    FOR retval IN EXECUTE query LOOP
+        RETURN NEXT retval;
+    END LOOP ;
+END;
+$$ LANGUAGE PLPGSQL;
+

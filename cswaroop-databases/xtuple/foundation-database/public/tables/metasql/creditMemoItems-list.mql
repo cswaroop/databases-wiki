@@ -1,0 +1,26 @@
+-- Group: creditMemoItems
+-- Name:  list
+-- Notes: -- used by creditMemo
+--        Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+--        See www.xtuple.com/CPAL for the full text of the software license.
+SELECT cmitem_id, cmitem_linenumber, COALESCE(item_number, cmitem_number) AS item_number,
+       CASE WHEN (item_number IS NOT NULL) THEN (item_descrip1 || ' ' || item_descrip2) 
+            ELSE cmitem_descrip END AS description,
+       warehous_code, quom.uom_name AS qtyuom,
+       cmitem_qtyreturned, cmitem_qtycredit,
+       puom.uom_name AS priceuom,
+       cmitem_unitprice,
+       (cmitem_qtycredit * cmitem_qty_invuomratio) *
+       (cmitem_unitprice / cmitem_price_invuomratio) AS extprice,
+       'qty' AS cmitem_qtyreturned_xtnumericrole,
+       'qty' AS cmitem_qtycredit_xtnumericrole,
+       'salesprice' AS cmitem_unitprice_xtnumericrole,
+       'curr' AS extprice_xtnumericrole 
+FROM cmitem
+LEFT OUTER JOIN itemsite ON (cmitem_itemsite_id=itemsite_id)
+LEFT OUTER JOIN item ON (itemsite_item_id=item_id)
+LEFT OUTER JOIN whsinfo ON (itemsite_warehous_id=warehous_id)
+LEFT OUTER JOIN uom AS quom ON (cmitem_qty_uom_id=quom.uom_id)
+LEFT OUTER JOIN uom AS puom ON (cmitem_price_uom_id=puom.uom_id)
+WHERE (cmitem_cmhead_id=<? value("cmhead_id") ?>)
+ORDER BY cmitem_linenumber;

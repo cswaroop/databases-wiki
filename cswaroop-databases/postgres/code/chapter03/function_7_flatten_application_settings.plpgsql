@@ -1,0 +1,89 @@
+
+
+CREATE TABLE application_settings_old (
+		version varchar(200),
+		key varchar(200),
+		value varchar(2000)
+);
+
+
+CREATE TABLE  application_settings_new (
+		version varchar(200),
+		full_name varchar(2000),
+		description varchar(2000),
+		print_certificate varchar(2000),
+		show_advertisements varchar(2000),
+		show_splash_screen varchar(2000)
+);
+
+
+
+
+CREATE OR REPLACE FUNCTION 
+    flatten_application_settings(app_version varchar(200))
+RETURNS setof application_settings_new
+AS $$
+BEGIN
+    -- Create a temporary table to hold a single row of data
+    IF EXISTS (SELECT relname FROM pg_class WHERE relname='tmp_settings') 
+    THEN
+      TRUNCATE TABLE tmp_settings;
+    ELSE
+      CREATE TEMP TABLE tmp_settings (LIKE application_settings_new);
+    END IF;
+
+    -- the row will contain all of the data for this application version
+    INSERT INTO tmp_settings (version) VALUES (app_version);
+
+    -- add the details to the record for this application version
+    UPDATE tmp_settings
+    SET full_name = (SELECT value 
+                       FROM application_settings_old 
+                      WHERE version = app_version 
+                        AND key='full_name'),
+        description = (SELECT value 
+                         FROM application_settings_old 
+                        WHERE version = app_version 
+                          AND key='description'),
+        print_certificate = (SELECT value 
+                               FROM application_settings_old 
+                              WHERE version = app_version 
+                                AND key='print_certificate'),
+        show_advertisements = (SELECT value 
+                                 FROM application_settings_old 
+                                WHERE version = app_version 
+                                  AND key='show_advertisements'),
+        show_splash_screen = (SELECT value 
+                                FROM application_settings_old 
+                               WHERE version = app_version 
+                                 AND key='show_splash_screen');
+
+    --  hand back the results to the caller
+    RETURN QUERY SELECT * FROM tmp_settings;
+END;
+$$ LANGUAGE plpgsql;
+
+INSERT INTO application_settings_new
+SELECT ( flatten_application_settings(version)).*
+FROM (
+    SELECT version
+    FROM application_settings_old
+    GROUP BY version
+);
+
+
+SELECT fib(55);
+
+SELECT (flatten_application_settings('9.08.97'));
+
+SELECT * FROM flatten_application_settings('9.08.97');
+
+
+
+UPDATE application_settings_new 
+   SET full_name = flat.full_name,
+       description  = flat.description,
+       print_certificate = flat.print_certificate,
+       show_advertisements = flat.show_advertisements,
+       show_splash_screen = flat.show_splash_screen  
+  FROM flatten_application_settings('9.08.97') flat;

@@ -1,0 +1,42 @@
+CREATE OR REPLACE FUNCTION userinfo(
+                    INOUT username name, 
+                    OUT user_id oid, 
+                    OUT is_superuser boolean)
+AS $$
+    class PGUser:
+        def __init__(self,username,user_id,is_superuser):
+            self.username = username
+            self.user_id = user_id
+            self.is_superuser = is_superuser
+    u = plpy.execute("""\
+            select usename,usesysid,usesuper
+              from pg_user
+             where usename = '%s'""" % username)[0]
+    user = PGUser(u['usename'], u['usesysid'], u['usesuper'])
+    return user
+$$ LANGUAGE plpythonu;
+
+CREATE OR REPLACE FUNCTION userinfo(
+                    INOUT username name, 
+                    OUT user_id oid, 
+                    OUT is_superuser boolean)
+AS $$
+    u = plpy.execute("""\
+            select usename,usesysid,usesuper
+              from pg_user
+             where usename = '%s'""" % username)[0]
+    return {'username':u['usename'], 'user_id':u['usesysid'], 'is_superuser':u['usesuper']}
+$$ LANGUAGE plpythonu;
+
+CREATE OR REPLACE FUNCTION userinfo(
+                    INOUT username name, 
+                    OUT user_id oid, 
+                    OUT is_superuser boolean)
+AS $$
+    u = plpy.execute("""\
+            select usename,usesysid,usesuper
+              from pg_user
+             where usename = '%s'""" % username)[0]
+    return (u['usename'], u['usesysid'], u['usesuper'])
+$$ LANGUAGE plpythonu;
+

@@ -1,0 +1,333 @@
+-- Group: qoh
+-- Name: detail
+-- Notes: 
+-- Quantity on Hand By Location
+-- Copyright (c) 1999-2016 by OpenMFG LLC, d/b/a xTuple.
+-- See www.xtuple.com/CPAL for the full text of the software license.
+
+<? if exists("byLocation") ?>
+SELECT itemloc_id, alt_id, warehous_code, item_number,
+       f_descrip, f_lotserial, uom_name,
+       qoh, reservedqty,
+       'qty' AS qoh_xtnumericrole,
+       'qty' AS reservedqty_xtnumericrole,
+       level AS xtindentrole
+FROM (
+      SELECT itemloc_id, 0 AS alt_id, 0 AS level, item_number AS sortkey, warehous_code, item_number,
+             (item_descrip1 || ' ' || item_descrip2) AS f_descrip,
+             formatlotserialnumber(itemloc_ls_id) AS f_lotserial, uom_name,
+             itemloc_qty AS qoh,
+  <? if exists("EnableSOReservationsByLocation") ?>
+             qtyReservedLocation(itemloc_id) AS reservedqty
+  <? else ?>
+             0 AS reservedqty
+  <? endif ?>
+      FROM itemloc, itemsite, site(), item, uom
+      WHERE ((itemloc_itemsite_id=itemsite_id)
+         AND (itemsite_item_id=item_id)
+         AND (item_inv_uom_id=uom_id)
+         AND (itemsite_warehous_id=warehous_id)
+         AND (itemloc_location_id=<? value("location_id") ?>))
+      UNION
+      SELECT -1 AS itemloc_id, 0 AS alt_id, 0 AS level, item_number AS sortkey, warehous_code, item_number,
+             (item_descrip1 || ' ' || item_descrip2) AS f_descrip,
+             <? value("na") ?> AS f_lotserial, uom_name,
+             itemsite_qtyonhand AS qoh,
+             0 AS reservedqty
+      FROM itemsite, site(), item, uom
+      WHERE ((itemsite_item_id=item_id)
+         AND (item_inv_uom_id=uom_id)
+         AND (itemsite_warehous_id=warehous_id)
+         AND (NOT itemsite_loccntrl)
+         AND (itemsite_location_id=<? value("location_id") ?>))
+  <? if exists("EnableSOReservationsByLocation") ?>
+      UNION
+      SELECT itemloc_id, -1 AS alt_id, 1 AS level, item_number AS sortkey, '' AS warehous_code, '' AS item_number,
+             (reserve_demand_type || '-' || formatSOItemNumber(reserve_demand_id)) AS f_descrip,
+             '' AS f_lotserial, '' AS uom_name,
+             NULL AS qoh,
+             reserve_qty AS reservedqty
+      FROM reserve, itemloc, itemsite, item
+      WHERE ((reserve_supply_id=itemloc_id)
+         AND (reserve_supply_type='I')
+         AND (itemsite_id=itemloc_itemsite_id)
+         AND(item_id=itemsite_item_id)
+         AND(itemloc_location_id=<? value("location_id") ?>))
+  <? endif ?>
+  <? if exists("ShowDemand") ?>
+      UNION
+      SELECT itemloc_id, coitem_cohead_id AS alt_id, 1 AS level, item_number AS sortkey, '' AS warehous_code, '' AS item_number,
+             (<? value("so") ?>|| '-' || formatSOItemNumber(coitem_id)) AS f_descrip,
+             '' AS f_lotserial, '' AS uom_name,
+             itemUOMtoUOM(item_id, coitem_qty_uom_id, NULL, (coitem_qtyord - coitem_qtyshipped - qtyAtShipping(coitem_id))) AS qoh,
+             0 AS reservedqty
+      FROM itemloc JOIN itemsite ON (itemsite_id=itemloc_itemsite_id)
+                   JOIN item ON (item_id=itemsite_item_id)
+                   JOIN coitem ON (coitem_itemsite_id=itemloc_itemsite_id AND coitem_status='O')
+      WHERE ((coitem_qtyord > (coitem_qtyshipped + qtyAtShipping(coitem_id)))
+         AND(itemloc_location_id=<? value("location_id") ?>))
+      UNION
+      SELECT itemloc_id, -1 AS alt_id, 1 AS level, item_number AS sortkey, '' AS warehous_code, '' AS item_number,
+             (<? value("wo") ?>|| '-' || formatWONumber(womatl_wo_id)) AS f_descrip,
+             '' AS f_lotserial, '' AS uom_name,
+             (womatl_qtyreq - womatl_qtyiss) AS qoh,
+             0 AS reservedqty
+      FROM itemloc JOIN itemsite ON (itemsite_id=itemloc_itemsite_id)
+                   JOIN item ON (item_id=itemsite_item_id)
+                   JOIN womatl ON (womatl_itemsite_id=itemloc_itemsite_id)
+      WHERE ((womatl_qtyreq > womatl_qtyiss)
+         AND(itemloc_location_id=<? value("location_id") ?>))
+    <? if exists("MultiWhs") ?>
+      UNION
+      SELECT itemloc_id, -1 AS alt_id, 1 AS level, item_number AS sortkey, '' AS warehous_code, '' AS item_number,
+             (<? value("to") ?>|| '-' || formatTONumber(toitem_id)) AS f_descrip,
+             '' AS f_lotserial, '' AS uom_name,
+             (toitem_qty_ordered - toitem_qty_shipped - qtyAtShipping('TO', toitem_id)) AS qoh,
+             0 AS reservedqty
+      FROM itemloc JOIN itemsite ON (itemsite_id=itemloc_itemsite_id)
+                   JOIN item ON (item_id=itemsite_item_id)
+                   JOIN toitem ON (toitem_item_id=item_id AND toitem_status='O')
+                   JOIN tohead ON (tohead_id=toitem_tohead_id AND tohead_src_warehous_id=itemsite_warehous_id)
+      WHERE ((toitem_qty_ordered > (toitem_qty_shipped + qtyAtShipping('TO', toitem_id)))
+         AND(itemloc_location_id=<? value("location_id") ?>))
+    <? endif ?>
+  <? endif ?>
+     ) AS data
+ORDER BY
+         sortkey, itemloc_id, level;
+<? else ?>
+<? if exists("asOf") ?>
+SELECT forwardupdateinvbalance(invbal_id)
+FROM (
+      SELECT DISTINCT ON (itemsite_id) invbal_id
+      FROM invbal, itemsite, item, site(), classcode, uom, costcat, period
+      WHERE ((invbal_dirty)
+         AND (invbal_period_id=period_id)
+         AND (itemsite_item_id=item_id)
+         AND (itemsite_warehous_id=warehous_id)
+         AND (itemsite_active)
+         AND (item_inv_uom_id=uom_id)
+         AND (item_classcode_id=classcode_id)
+         AND (itemsite_costcat_id=costcat_id)
+  <? if exists("item_id") ?>
+         AND (itemsite_item_id=<? value("item_id") ?>)
+  <? endif ?>
+  <? if exists("classcode_id") ?>
+         AND (classcode_id=<? value("classcode_id") ?>)
+  <? endif ?>
+  <? if exists("classcode_pattern") ?>
+         AND (classcode_id IN (SELECT classcode_id
+                               FROM classcode
+                               WHERE classcode_code ~ <? value("classcode_pattern") ?>))
+  <? endif ?>
+  <? if exists("costcat_id") ?>
+         AND (costcat_id=<? value("costcat_id") ?>)
+  <? endif ?>
+  <? if exists("costcat_pattern") ?>
+         AND (costcat_id IN (SELECT costcat_id
+                               FROM costcat
+                               WHERE costcat_code ~ <? value("costcat_pattern") ?>))
+  <? endif ?>
+  <? if exists("itemgrp_id") ?>
+         AND (item_id IN (SELECT itemgrpitem_item_id
+                          FROM itemgrpitem
+                          WHERE (itemgrpitem_itemgrp_id=<? value("itemgrp_id") ?>)))
+  <? endif ?>
+  <? if exists("itemgrp_pattern") ?>
+         AND (item_id IN (SELECT itemgrpitem_item_id
+                          FROM itemgrpitem, itemgrp
+                          WHERE ((itemgrpitem_itemgrp_id=itemgrp_id)
+                             AND (itemgrp_name ~ <? value("itemgrp_pattern") ?>))))
+  <? endif ?>
+  <? if exists("showPositive") ?>
+       AND (itemsite_qtyonhand > 0)
+  <? elseif exists("showNegative") ?>
+       AND (itemsite_qtyonhand < 0)
+  <? endif ?>
+  <? if exists("warehous_id") ?>
+         AND (itemsite_warehous_id=<? value("warehous_id") ?>)
+  <? endif ?>
+            )
+       ORDER BY itemsite_id, period_start
+     ) AS data
+;
+<? endif ?>
+--  Quantity on Hand
+SELECT itemsite_id, detail,warehous_code,
+       classcode_code, item_number, uom_name,
+       costcat_code, itemsite_abcclass,
+       item_descrip1, item_descrip2,
+       (item_descrip1 || ' ' || item_descrip2) AS itemdescrip,
+       defaultlocation,
+       reorderlevel, formatQty(reorderlevel) AS f_reorderlevel,
+       qoh, formatQty(qoh) AS f_qoh,
+       availqoh, formatQty(availqoh) AS f_availqoh,
+       nonavailqoh, formatQty(nonavailqoh) AS f_nonavailqoh,
+       netqoh, formatQty(netqoh) AS f_netqoh,
+       nonnetqoh, formatQty(nonnetqoh) AS f_nonnetqoh,
+       cost, (cost * qoh) AS value,
+       (cost * availqoh) AS availvalue,
+       (cost * nonavailqoh) AS nonavailvalue,
+       (cost * netqoh) AS netvalue,
+       (cost * nonnetqoh) AS nonnetvalue,
+       CASE WHEN(itemsite_costmethod='A') THEN 'Average'
+            WHEN(itemsite_costmethod='S') THEN 'Standard'
+            WHEN(itemsite_costmethod='J') THEN 'Job'
+            WHEN(itemsite_costmethod='N') THEN 'None'
+         ELSE 'UNKNOWN'
+       END AS costmethod,
+  <? if exists("showValue") ?>
+       formatMoney(cost) AS f_cost,
+       formatMoney(cost * qoh) AS f_value,
+       formatMoney(cost * availqoh) AS f_availvalue,
+       formatMoney(cost * nonavailqoh) AS f_nonavailvalue,
+       formatMoney(cost * netqoh) AS f_netvalue,
+       formatMoney(cost * nonnetqoh) AS f_nonnetvalue,
+       CASE WHEN(itemsite_costmethod='A') THEN 'Average'
+            WHEN(itemsite_costmethod='S') THEN 'Standard'
+            WHEN(itemsite_costmethod='J') THEN 'Job'
+            WHEN(itemsite_costmethod='N') THEN 'None'
+         ELSE 'UNKNOWN'
+       END AS f_costmethod,
+  <? endif ?>
+       'qty' AS reorderlevel_xtnumericrole,
+       'qty' AS qoh_xtnumericrole,
+       'qty' AS availqoh_xtnumericrole,
+       'qty' AS nonavailqoh_xtnumericrole,
+       'qty' AS netqoh_xtnumericrole,
+       'qty' AS nonnetqoh_xtnumericrole,
+       0 AS qoh_xttotalrole,
+       0 AS availqoh_xttotalrole,
+       0 AS nonavailqoh_xttotalrole,
+       0 AS netqoh_xttotalrole,
+       0 AS nonnetqoh_xttotalrole,
+       'cost' AS cost_xtnumericrole,
+       'curr' AS value_xtnumericrole,
+       'curr' AS availvalue_xtnumericrole,
+       'curr' AS nonavailvalue_xtnumericrole,
+       'curr' AS netvalue_xtnumericrole,
+       'curr' AS nonnetvalue_xtnumericrole,
+       0 AS value_xttotalrole,
+       0 AS availvalue_xttotalrole,
+       0 AS nonavailvalue_xttotalrole,
+       0 AS netvalue_xttotalrole,
+       0 AS nonnetvalue_xttotalrole,
+       <? value("na") ?> AS availqoh_xtnullrole,
+       <? value("na") ?> AS nonavailqoh_xtnullrole,
+       <? value("na") ?> AS availvalue_xtnullrole,
+       <? value("na") ?> AS nonavailvalue_xtnullrole,
+       <? value("na") ?> AS netqoh_xtnullrole,
+       <? value("na") ?> AS nonnetqoh_xtnullrole,
+       <? value("na") ?> AS netvalue_xtnullrole,
+       <? value("na") ?> AS nonnetvalue_xtnullrole,
+       CASE WHEN (qoh < 0) THEN 'error' END AS qoh_qtforegroundrole,
+       CASE WHEN (reorderlevel > qoh) THEN 'warning' END AS qoh_qtforegroundrole
+FROM (
+      SELECT itemsite_id, itemsite_loccntrl, itemsite_costmethod, itemsite_abcclass,
+             ((itemsite_loccntrl) OR (itemsite_controlmethod IN ('L', 'S')) ) AS detail,
+             classcode_code, item_number, uom_name, item_descrip1, item_descrip2,
+             costcat_code, 
+             CASE WHEN (NOT useDefaultLocation(itemsite_id)) THEN <? value("none") ?>
+               ELSE defaultLocationName(itemsite_id)
+             END AS defaultlocation,
+             warehous_code,
+             CASE WHEN(itemsite_useparams) THEN itemsite_reorderlevel ELSE 0.0 END AS reorderlevel,
+  <? if exists("asOf") ?>
+             COALESCE(invbal_qoh_ending,0) AS qoh,
+             COALESCE(invbal_qoh_ending,0) AS availqoh,
+             COALESCE(invbal_nn_ending,0) AS nonavailqoh,
+             COALESCE(invbal_qoh_ending,0) AS netqoh,
+             COALESCE(invbal_nn_ending,0) AS nonnetqoh,
+  <? else ?>
+             itemsite_qtyonhand AS qoh,
+             qtyAvailable(itemsite_id) AS availqoh,
+             qtyAvailable(itemsite_id, FALSE) AS nonavailqoh,
+             qtyNetable(itemsite_id) AS netqoh,
+             qtyNetable(itemsite_id, FALSE) AS nonnetqoh,
+  <? endif ?>
+  <? if exists("useStandardCosts") ?>
+             stdcost(item_id) AS cost
+  <? elseif exists("useActualCosts") ?>
+             actcost(item_id) AS cost
+  <? else ?>
+    <? if exists("asOf") ?>
+             COALESCE((invbal_value_ending / CASE WHEN(invbal_qoh_ending=0) THEN 1
+                                                  ELSE invbal_qoh_ending END),0) AS cost
+    <? else ?>
+             (itemsite_value / CASE WHEN(itemsite_qtyonhand=0) THEN 1
+                                    ELSE itemsite_qtyonhand END) AS cost
+    <? endif ?>
+  <? endif ?>
+      FROM item, site(), classcode, uom, costcat, itemsite
+  <? if exists("asOf") ?>
+        LEFT OUTER JOIN invbal ON ((itemsite_id=invbal_itemsite_id)
+                               AND (invbal_period_id=<? value("asOf") ?>))
+  <? endif ?>
+      WHERE ((itemsite_item_id=item_id)
+         AND (itemsite_warehous_id=warehous_id)
+         AND (itemsite_active)
+         AND (item_inv_uom_id=uom_id)
+         AND (item_classcode_id=classcode_id)
+         AND (itemsite_costcat_id=costcat_id)
+  <? if exists("item_id") ?>
+         AND (itemsite_item_id=<? value("item_id") ?>)
+  <? endif ?>
+  <? if exists("classcode_id") ?>
+         AND (classcode_id=<? value("classcode_id") ?>)
+  <? endif ?>
+  <? if exists("classcode_pattern") ?>
+         AND (classcode_id IN (SELECT classcode_id
+                               FROM classcode
+                               WHERE classcode_code ~ <? value("classcode_pattern") ?>))
+  <? endif ?>
+  <? if exists("costcat_id") ?>
+         AND (costcat_id=<? value("costcat_id") ?>)
+  <? endif ?>
+  <? if exists("costcat_pattern") ?>
+         AND (costcat_id IN (SELECT costcat_id
+                               FROM costcat
+                               WHERE costcat_code ~ <? value("costcat_pattern") ?>))
+  <? endif ?>
+  <? if exists("itemgrp_id") ?>
+         AND (item_id IN (SELECT itemgrpitem_item_id
+                          FROM itemgrpitem
+                          WHERE (itemgrpitem_itemgrp_id=<? value("itemgrp_id") ?>)))
+  <? endif ?>
+  <? if exists("itemgrp_pattern") ?>
+         AND (item_id IN (SELECT itemgrpitem_item_id
+                          FROM itemgrpitem, itemgrp
+                          WHERE ((itemgrpitem_itemgrp_id=itemgrp_id)
+                             AND (itemgrp_name ~ <? value("itemgrp_pattern") ?>))))
+  <? endif ?>
+  <? if exists("showPositive") ?>
+    <? if exists("asOf") ?>
+       AND (COALESCE(invbal_qoh_ending,0) > 0)
+    <? else ?>
+       AND (itemsite_qtyonhand > 0)
+    <? endif ?>
+  <? elseif exists("showNegative") ?>
+    <? if exists("asOf") ?>
+       AND (COALESCE(invbal_qoh_ending,0) < 0)
+    <? else ?>
+       AND (itemsite_qtyonhand < 0)
+    <? endif ?>
+  <? endif ?>
+  <? if exists("warehous_id") ?>
+         AND (itemsite_warehous_id=<? value("warehous_id") ?>)
+  <? endif ?>
+  <? if exists("abc_class") ?>
+    <? foreach("abc_class") ?>
+      <? if isfirst("abc_class") ?>
+        AND (itemsite_abcclass=<? value("abc_class") ?>
+      <? else ?>
+        OR itemsite_abcclass=<? value("abc_class") ?>
+      <? endif ?>
+      <? if islast("abc_class") ?>
+        )
+      <? endif ?>
+    <? endforeach ?>
+  <? endif ?>
+            )
+     ) AS data
+ORDER BY warehous_code, item_number;
+<? endif ?>

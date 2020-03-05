@@ -1,0 +1,21 @@
+-- Group: selectPayments
+-- Name: clearall
+-- Notes: used by selectPayments
+-- Copyright (c) 1999-2014 by OpenMFG LLC, d/b/a xTuple.
+-- See www.xtuple.com/CPAL for the full text of the software license.
+
+
+SELECT clearPayment(apselect_id) AS result
+FROM vendinfo JOIN apopen ON (apopen_vend_id=vend_id)
+              JOIN apselect ON (apselect_apopen_id=apopen_id)
+WHERE ((TRUE)
+<? if exists("vend_id") ?>
+   AND (vend_id = <? value("vend_id") ?>)
+<? elseif exists("vendtype_id") ?>
+   AND (vend_vendtype_id = <? value("vendtype_id") ?>)
+<? elseif exists("vendtype_pattern") ?>
+   AND (vend_vendtype_id IN (SELECT vendtype_id
+                             FROM vendtype
+                             WHERE (vendtype_code ~ <? value("vendtype_pattern") ?>)))
+<? endif ?>
+      );

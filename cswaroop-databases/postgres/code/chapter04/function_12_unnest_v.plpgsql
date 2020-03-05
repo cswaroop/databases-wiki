@@ -1,0 +1,7 @@
+CREATE OR REPLACE FUNCTION unnest_v(VARIADIC arr anyarray)
+  RETURNS SETOF anyelement AS $$
+BEGIN
+    RETURN QUERY SELECT unnest(arr);
+END;
+$$ LANGUAGE plpgsql;
+

@@ -1,0 +1,173 @@
+-- Group: salesOrderItem
+-- Name: simple
+-- Notes: simple sales order maintain coitem table
+-- Copyright (c) 1999-2015 by OpenMFG LLC, d/b/a xTuple.
+-- See www.xtuple.com/CPAL for the full text of the software license.
+
+<? if exists("ViewMode") ?>
+
+<? elseif exists("NewMode") ?>
+  INSERT INTO coitem
+  ( coitem_id,
+    coitem_cohead_id,
+    coitem_itemsite_id,
+    coitem_status,
+    coitem_scheddate,
+    coitem_promdate,
+    coitem_qtyord,
+    coitem_qty_uom_id,
+    coitem_qty_invuomratio,
+    coitem_qtyshipped,
+    coitem_qtyreturned,
+    coitem_unitcost,
+    coitem_custprice,
+    coitem_pricemode,
+    coitem_price,
+    coitem_listprice,
+    coitem_price_uom_id,
+    coitem_price_invuomratio,
+    coitem_prcost,
+    coitem_taxtype_id )
+  SELECT
+    <? value("id") ?>,
+    <? value("sohead_id") ?>,
+    itemsite_id,
+    'O',
+    CURRENT_DATE,
+    endOfTime(),
+    <? value("qtyord") ?>,
+    item_inv_uom_id,
+    1.0,
+    0.0,
+    0.0,
+    itemCost(itemsite_id),
+    itemPrice(item_id,
+              cohead_cust_id,
+              cohead_shipto_id,
+              <? value("qtyord") ?>,
+              item_inv_uom_id,
+              item_price_uom_id,
+              cohead_curr_id,
+              cohead_orderdate,
+              cohead_orderdate),
+    'D',
+    itemPrice(item_id,
+              cohead_cust_id,
+              cohead_shipto_id,
+              <? value("qtyord") ?>,
+              item_inv_uom_id,
+              item_price_uom_id,
+              cohead_curr_id,
+              cohead_orderdate,
+              cohead_orderdate),
+    listPrice(item_id,
+              cohead_cust_id,
+              cohead_shipto_id,
+              itemsite_warehous_id),
+    item_price_uom_id,
+    1.0,
+    0.0,
+    getItemTaxType(item_id, cust_taxzone_id)
+  FROM cohead, custinfo, itemsite, item 
+  WHERE (cohead_id=<? value("sohead_id") ?>)
+    AND (cust_id=cohead_cust_id)
+    AND (itemsite_item_id=<? value("item_id") ?>)
+    AND (itemsite_warehous_id=cohead_warehous_id)
+    AND (item_id=<? value("item_id") ?>);
+
+<? elseif exists("EditMode") ?>
+  UPDATE coitem SET
+    coitem_itemsite_id=itemsite_id,
+    coitem_qtyord=<? value("qtyord") ?>,
+    coitem_qty_uom_id=item_inv_uom_id,
+    coitem_unitcost=itemCost(itemsite_id),
+    coitem_custprice=itemPrice(item_id,
+                               cohead_cust_id,
+                               cohead_shipto_id,
+                               <? value("qtyord") ?>,
+                               item_inv_uom_id,
+                               item_price_uom_id,
+                               cohead_curr_id,
+                               cohead_orderdate,
+                               cohead_orderdate),
+    coitem_price=itemPrice(item_id,
+                           cohead_cust_id,
+                           cohead_shipto_id,
+                           <? value("qtyord") ?>,
+                           item_inv_uom_id,
+                           item_price_uom_id,
+                           cohead_curr_id,
+                           cohead_orderdate,
+                           cohead_orderdate),
+    coitem_price_uom_id=item_price_uom_id,
+    coitem_taxtype_id=getItemTaxType(item_id, cust_taxzone_id)
+  FROM cohead, custinfo, itemsite, item 
+  WHERE (cohead_id=<? value("sohead_id") ?>)
+    AND (cust_id=cohead_cust_id)
+    AND (itemsite_item_id=<? value("item_id") ?>)
+    AND (itemsite_warehous_id=cohead_warehous_id)
+    AND (item_id=<? value("item_id") ?>)
+    AND (coitem_id=<? value("id") ?>);
+
+<? elseif exists("DeleteMode") ?>
+  SELECT deleteSOItem(<? value("id") ?>) AS result;
+
+<? elseif exists("RepriceMode") ?>
+  UPDATE coitem SET coitem_price=itemPrice(item_id,
+                                           cohead_cust_id,
+                                           cohead_shipto_id,
+                                           coitem_qtyord,
+                                           coitem_qty_uom_id,
+                                           coitem_price_uom_id,
+                                           cohead_curr_id,
+                                           cohead_orderdate,
+                                           cohead_orderdate),
+                    coitem_custprice=itemPrice(item_id,
+                                               cohead_cust_id,
+                                               cohead_shipto_id,
+                                               coitem_qtyord,
+                                               coitem_qty_uom_id,
+                                               coitem_price_uom_id,
+                                               cohead_curr_id,
+                                               cohead_orderdate,
+                                               cohead_orderdate)
+    FROM cohead, item, itemsite
+   WHERE (coitem_status NOT IN ('C','X'))
+     AND (coitem_subnumber=0)
+     AND (NOT coitem_firm)
+  <? if exists("ignoreDiscounts") ?>
+     AND (coitem_price = coitem_custprice)
+  <? endif ?>
+    AND (itemsite_id=coitem_itemsite_id)
+    AND (itemsite_item_id=item_id)
+    AND (coitem_cohead_id=cohead_id)
+    AND (cohead_id=<? value("sohead_id") ?>);
+
+<? elseif exists("CheckDupMode") ?>
+  SELECT coitem_id, coitem_qtyord
+  FROM coitem JOIN itemsite ON (itemsite_id=coitem_itemsite_id)
+              JOIN cohead ON (cohead_id=coitem_cohead_id)
+  WHERE (coitem_cohead_id=<? value("sohead_id") ?>)
+    AND (itemsite_item_id=<? value("item_id") ?>)
+    AND (itemsite_warehous_id=cohead_warehous_id);
+
+<? elseif exists("CheckPriceMode") ?>
+  SELECT COALESCE(itemPrice(item_id,
+                            cohead_cust_id,
+                            cohead_shipto_id,
+                            <? value("qtycheck") ?>,
+                            item_inv_uom_id,
+                            item_price_uom_id,
+                            cohead_curr_id,
+                            cohead_orderdate,
+                            cohead_orderdate), -1.0) AS unitprice
+  FROM cohead, custinfo, itemsite, item 
+  WHERE (cohead_id=<? value("sohead_id") ?>)
+    AND (cust_id=cohead_cust_id)
+    AND (itemsite_item_id=<? value("item_id") ?>)
+    AND (itemsite_warehous_id=cohead_warehous_id)
+    AND (item_id=<? value("item_id") ?>);
+
+<? else ?>
+  RAISE EXCEPTION 'simple salesorder invalid mode';
+<? endif ?>

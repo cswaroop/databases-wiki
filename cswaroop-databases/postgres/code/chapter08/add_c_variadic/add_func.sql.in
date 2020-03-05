@@ -1,0 +1,10 @@
+
+
+CREATE OR REPLACE FUNCTION add_arr(int[]) RETURNS int
+     AS 'MODULE_PATHNAME', 'add_int32_array'
+     LANGUAGE C STRICT;
+
+CREATE OR REPLACE FUNCTION add(VARIADIC a int[]) RETURNS int
+     AS 'MODULE_PATHNAME', 'add_int32_array'
+     LANGUAGE C STRICT;
+

@@ -1,0 +1,145 @@
+/**
+ * EDI Profile PEG.js Grammar
+ * ==========================
+ *
+ * This file is a PEG.js [1] Grammar for xTuple's EDI Profile tokens. It is
+ * used to generate a Javascipt parser that can be passed an EDI Profile string
+ * and an options object containing a params object. The parser returns a
+ * string with all EDI Profile tokens parsed and replaced with the appropriate
+ * params values.
+ *
+ * [1] http://pegjs.org/
+ *
+ * Example generated parser usage:
+ *  var options = {
+ *        params: {
+ *          foo: 'bar'
+ *        }
+ *      },
+ *      ediText: 'Dear </foo>, Hello.';
+ *
+ *  parser.parse(ediText, options); // returns "Dear bar, Hello."
+ *
+ */
+
+/**
+ * PEG.js grammar initializer
+ */
+{
+  // The default params below are for the test above.
+  params = options.params ? options.params : {
+      foo: 'bar'
+    }
+  ,extractList = function (list, index) {
+      var result = new Array(list.length),
+          i;
+
+      for (i = 0; i < list.length; i++) {
+        result[i] = list[i][index];
+      }
+
+      return result;
+    }
+  ,buildList = function (first, rest, index) {
+      return [first].concat(extractList(rest, index));
+    }
+  ,optionalList = function (value) {
+      return value !== null ? value : [];
+    }
+}
+
+/**
+ * Grammar startRule
+ */
+Start
+  = start:__ editext:EDIProfile end:__ {
+      return start.join('') + editext + end.join('');
+    }
+
+/**
+ * EDIProfile Grammer
+ */
+EDIProfile
+  = body:SourceElements? {
+      return body;
+    }
+
+SourceElements
+  = first:(SourceElement) rest:(SourceElement)* {
+      return first + rest.join('');
+    }
+
+SourceElement
+  = token:Token {
+      //return "token: " + token;
+      return token;
+    }
+  / body:BodyText {
+      //return "body: " + body;
+      return body;
+    }
+
+/**
+ * EDIProfile Token
+ */
+Token
+  = editoken:EDIToken {
+      //return "EDIToken: " + editoken;
+      return editoken;
+    }
+
+EDIToken
+  = start:EDITokenOpen body:(!EDITokenClose SourceCharacter)* end:EDITokenClose {
+      var id = body ? extractList(body, 1).join('') : '';
+
+      if (params[id]) {
+        return params[id];
+      } else if (params.hasOwnProperty(id)) {
+        return params[id];
+      } else {
+        return start + id + end;
+      }
+    }
+
+EDITokenOpen    = '</'
+EDITokenClose   = '>'
+
+/**
+ * Simple Body Text Grammer
+ */
+BodyText
+  = body:(BodyPattern) {
+      return (body ? body : '');
+    }
+
+BodyPattern
+  = body:SourceCharacter {
+      return (body ? body : '');
+    }
+
+/**
+ * Generic Grammar
+ */
+SourceCharacter
+  = .
+__
+  = (WhiteSpace / LineTerminatorSequence)*
+
+WhiteSpace "whitespace"
+  = "\t"
+  / "\v"
+  / "\f"
+  / " "
+  / "\u00A0"
+  / "\uFEFF"
+  / Zs
+
+LineTerminatorSequence "end of line"
+  = "\n"
+  / "\r\n"
+  / "\r"
+  / "\u2028"
+  / "\u2029"
+
+// Separator, Space
+Zs = [\u0020\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]

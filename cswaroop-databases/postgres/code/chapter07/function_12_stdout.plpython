@@ -1,0 +1,32 @@
+CREATE OR REPLACE FUNCTION capture_stdout(do_capture bool)
+  RETURNS text
+AS $$
+    import sys
+    if do_capture:
+        try:
+            sys.stdout = GD['stdout_to_notice']
+        except KeyError:
+            class WriteAsNotice:
+                def __init__(self, old_stdout):
+                    self.old_stdout = old_stdout
+                    self.printed = []
+                def write(self, s):
+                    self.printed.append(s)
+                def read(self):
+                    text = ''.join(self.printed)
+                    self.printed = []
+                    return text
+            GD['stdout_to_notice'] = WriteAsNotice(sys.stdout)
+            sys.stdout = GD['stdout_to_notice']
+        return "sys.stdout captured"
+    else:
+        sys.stdout = SD['stdout_to_notice'].old_stdout
+        return "restored original sys.stdout"
+$$ LANGUAGE plpythonu;
+
+CREATE OR REPLACE FUNCTION read_stdout()
+  RETURNS text
+AS $$
+    return GD['stdout_to_notice'].read()
+$$ LANGUAGE plpythonu;
+

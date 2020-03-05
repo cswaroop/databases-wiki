@@ -1,0 +1,6 @@
+CREATE FUNCTION even_numbers_from_list(up_to int)
+  RETURNS SETOF int 
+AS $$
+    return range(0,up_to,2)
+$$ LANGUAGE plpythonu;
+
